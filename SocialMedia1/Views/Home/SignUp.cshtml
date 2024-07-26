@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+@model LoginModel
+
+<div class="text-center" style="height: 600px">
+    <div style="font-size: 50px;">
+        Sign Up<br />
+    </div>
+    <form method="post" asp-controller="home" asp-action="SignUp" style="font-size: 20px;">
+        <label>Name</label><br />
+        <input type="text" name="Name"/><br />
+        <label>Email</label><br />
+        <input type="text" asp-for="Email" /><br />
+        <label>Password</label><br />
+        <input type="text" asp-for="Password" /><br /><br />
+        <input type="submit" />
+    </form>
+</div>

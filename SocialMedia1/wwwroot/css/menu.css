@@ -1,0 +1,20 @@
+﻿/* content start*/
+.content {
+    display: inline-block;
+    width: 60%;
+    vertical-align: top;
+    height: 600px;
+    text-align: center;
+}
+/* content end*/
+
+/* sidebar start*/
+.sidebar {
+    display: inline-block;
+    width: 20%;
+    border-right: 1px solid #ccc;
+    height: 600px;
+    text-align: center;
+    vertical-align: central;
+}
+/* sidebar end*/

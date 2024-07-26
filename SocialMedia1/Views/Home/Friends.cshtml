@@ -1,0 +1,24 @@
+﻿@{
+    Layout = "_MenuLayout";
+}
+<div>
+    <div class="options">
+        <label class="option" id="mineOption">Mine</label>
+        <label class="option" id="allOption">All</label>
+    </div>
+    <div style="position:relative; top: 10px;">
+        <label>Search</label>
+        <input type="text" id="searchBar"/>
+    </div>
+    <ul id="friendsList" class="friendsListStyle">
+    </ul>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/friends.js"></script>
+</div>
+
+<template id="accountTemplate">
+    <div style="display:block; position:relative">
+        <label class="friendLabel"></label>
+        <input type="button" value="add" class="friendButton"/>
+    </div>
+</template>

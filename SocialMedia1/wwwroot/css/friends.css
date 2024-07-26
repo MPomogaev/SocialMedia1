@@ -1,0 +1,36 @@
+﻿.options {
+    display:block;
+    font-size: 30px;
+    max-height: inherit;
+    vertical-align: central;
+}
+
+.option {
+    display: inline;
+    text-align:center;
+    margin-right: 10px;
+    margin-left: 10px;
+    vertical-align: bottom;
+}
+
+.option:hover {
+    border-bottom: 1px solid #ccc;
+}
+
+.friendsListStyle {
+    display: block;
+    position: relative;
+    top: 50px;
+    font-size: 25px;
+}
+
+.friendLabel {
+    display: block;
+    position: absolute;
+    left: 50px;
+}
+
+.friendButton {
+    position: relative;
+    right: -350px;
+}
