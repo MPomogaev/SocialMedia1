@@ -30,6 +30,11 @@
     left: 50px;
 }
 
+.chatButton {
+    position: relative;
+    right: -350px;
+}
+
 .friendButton {
     position: relative;
     right: -350px;

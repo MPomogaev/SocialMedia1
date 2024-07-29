@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace SocialMedia1.Migrations
 {
     /// <inheritdoc />
-    public partial class FriendsMigration : Migration
+    public partial class ChatUpdateMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,16 +27,16 @@ namespace SocialMedia1.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chat",
+                name: "ChatType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Chat", x => x.Id);
+                    table.PrimaryKey("PK_ChatType", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +79,26 @@ namespace SocialMedia1.Migrations
                         name: "FK_LoginModel_Account_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Account",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ChatTypeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chat", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Chat_ChatType_ChatTypeId",
+                        column: x => x.ChatTypeId,
+                        principalTable: "ChatType",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -133,6 +155,20 @@ namespace SocialMedia1.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "ChatType",
+                columns: new[] { "Id", "Type" },
+                values: new object[,]
+                {
+                    { 1, "perconal" },
+                    { 2, "group" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chat_ChatTypeId",
+                table: "Chat",
+                column: "ChatTypeId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_ChatAccount_ChatId",
                 table: "ChatAccount",
@@ -185,6 +221,9 @@ namespace SocialMedia1.Migrations
 
             migrationBuilder.DropTable(
                 name: "Chat");
+
+            migrationBuilder.DropTable(
+                name: "ChatType");
         }
     }
 }

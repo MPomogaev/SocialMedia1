@@ -1,0 +1,27 @@
+﻿.friendsList {
+
+}
+
+.newChat {
+    align-content: center;
+    position: relative;
+    top: 5px;
+}
+
+.pageContent {
+    display: block;
+}
+
+.friendOption {
+    width: 200px;
+    display: inline-block;
+    justify-content: center;
+    background-color: chartreuse;
+    border: 3px solid #ccc;
+    background-color: white;
+}
+
+.chats{
+    position:relative;
+    top: 0;
+}

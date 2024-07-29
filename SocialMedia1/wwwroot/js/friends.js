@@ -6,26 +6,18 @@ function highlight(option) {
     highlighted = option
 }
 
-function appendAccountToList(account, buttonActionSetter) {
-    let accountEntry = document.getElementById("accountTemplate")
-    const content = accountEntry.content.cloneNode(true)
-    content.querySelector("label").textContent = account.account.name
-    let button = content.querySelector("input")
-    buttonActionSetter(button, account)
-    friendsList.appendChild(content)
-}
 
 function setAccountsList(accounts, setContent) {
     friendsList.innerHTML = ""
     let accountEntry = document.getElementById("accountTemplate")
+    const searchString = searchBar.value
     for (let i = 0; i < accounts.length; i++) {
         const content = accountEntry.content.cloneNode(true)
-        setContent(content, accounts[i])
+        setContent(content, accounts[i], searchString)
     }
 }
 
 function setBlockForAllOption(content, account) {
-    content.querySelector("label").textContent = account.account.name
     let button = content.querySelector("input")
     button.value = "add"
     if (!account.isFriend) {
@@ -36,28 +28,51 @@ function setBlockForAllOption(content, account) {
     } else {
         button.disabled = true
     }
+    setCommonContent(content, account.account)
     friendsList.appendChild(content)
 }
 
 function setBlockForMineOption(content, account) {
-    content.querySelector("label").textContent = account.name
     let button = content.querySelector("input")
     button.value = "delete"
+    button.addEventListener("click", () => {
+        connection.invoke("DeleteFriend", account.id)
+        button.parentNode.remove()
+    })
+    setCommonContent(content, account)
     friendsList.appendChild(content)
 }
 
+function setCommonContent(content, account) {
+    content.querySelector("label").textContent = account.name
+    let button = content.querySelectorAll("input")[1]
+    button.value = "123"
+    button.addEventListener("click", () => {
+        connection.invoke("GoToChat", account.id)
+        button.parentNode.remove()
+    })
+}
+
 let highlighted = null
-let mineOption = document.getElementById("mineOption")
-let allOption = document.getElementById("allOption")
-let friendsList = document.getElementById("friendsList")
+const mineOption = document.getElementById("mineOption")
+const allOption = document.getElementById("allOption")
+const friendsList = document.getElementById("friendsList")
+const searchBar = document.getElementById("searchBar")
 
 mineOption.addEventListener('click', () => {
     highlight(mineOption)
-    connection.invoke("GetMineAccounts")
+    connection.invoke("GetMineAccounts", searchBar.value)
 })
 allOption.addEventListener('click', () => {
     highlight(allOption)
-    connection.invoke("GetAllAccounts")
+    connection.invoke("GetAllAccounts", searchBar.value)
+})
+searchBar.addEventListener('input', (event) => {
+    if (highlighted == mineOption) {
+        connection.invoke("GetMineAccounts", event.target.value)
+    } else {
+        connection.invoke("GetAllAccounts", event.target.value)
+    }
 })
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/friends").build();
@@ -70,7 +85,11 @@ connection.on("GetMineAccounts", (accounts) => {
     setAccountsList(accounts, setBlockForMineOption)
 })
 
+connection.on("GoToChat", (chatId) => {
+
+})
+
 connection.start().then(() => {
-    connection.invoke("GetAllAccounts")
+    connection.invoke("GetAllAccounts", "")
     highlight(allOption)
 })

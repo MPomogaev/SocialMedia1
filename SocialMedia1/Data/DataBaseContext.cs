@@ -11,17 +11,11 @@ namespace SocialMedia1.Data
         public DbSet<ChatAccount> ChatAccount { get; set; }
         public DbSet<LoginModel> LoginModel { get; set; }
         public DbSet<Friends> Friends { get; set; }
+        public DbSet<ChatType> ChatType { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options)
         : base(options){
-            //Database.EnsureDeleted();
-            Database.EnsureCreated();
         }
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=SocialMedia1;Trusted_Connection=True;");
-        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,7 +32,18 @@ namespace SocialMedia1.Data
                 .HasOne(e => e.Friend)
                 .WithOne()
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ChatType>()
+                .HasData(new ChatType((int)ChatTypes.personal, "perconal"));
+            modelBuilder.Entity<ChatType>()
+                .HasData(new ChatType((int)ChatTypes.group, "group"));
         }
-        
+
+        public int createChat()
+        {
+            Chat chat = new Chat();
+            this.Chat.Add(chat);
+            this.SaveChanges();
+            return chat.Id;
+        }
     }
 }
