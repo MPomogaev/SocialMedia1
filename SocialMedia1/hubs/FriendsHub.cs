@@ -18,7 +18,7 @@ namespace SocialMedia1.hubs {
 
         public async Task GetAllAccounts(string searchLine = "") {
             _logger.Log(LogLevel.Information, "searchLine: " + searchLine);
-            int selfAccId = GetSelfAccId();
+            int selfAccId = _context.GetSelfAccId();
             List<Account> accounts;
             if (searchLine == "") {
                 accounts = _context.Account.Where(x => x.Id != selfAccId).ToList();
@@ -51,7 +51,7 @@ namespace SocialMedia1.hubs {
         }
 
         public async Task AddFriend(int otherAccId) {
-            int selfAccId = GetSelfAccId();
+            int selfAccId = _context.GetSelfAccId();
             _logger.Log(LogLevel.Information, "add friendship self acc id: " + selfAccId + ", other acc id: " + otherAccId);
 
             _context.Friends.Add(new Friends(selfAccId, otherAccId));
@@ -59,35 +59,37 @@ namespace SocialMedia1.hubs {
         }
 
         public async Task DeleteFriend(int otherAccId) {
-            int selfAccId = GetSelfAccId();
+            int selfAccId = _context.GetSelfAccId();
             _logger.Log(LogLevel.Information, "delete friendship self acc id: " + selfAccId + ", other acc id: " + otherAccId);
 
             _context.Friends.Remove(new Friends(selfAccId, otherAccId));
             _context.SaveChanges();
         }
 
-        private async Task GoToChat(int otherAccId) {
+        public async Task GoToChat(int otherAccId) {
             _logger.Log(LogLevel.Information, "going to chat");
-            int selfAccId = GetSelfAccId();
-            var chatSearchResult = _context.ChatAccount
-                .Where(ch => ch.AccountId == selfAccId)
-                .Intersect(_context.ChatAccount
-                    .Where(ch => ch.AccountId == otherAccId));
+            int selfAccId = _context.GetSelfAccId();
+            var chatSearchResult = _context.GetChats(selfAccId)
+                .Intersect(_context.GetChats(otherAccId));
             int chatId;
             if (chatSearchResult.Count() == 0) {
-                chatId = _context.createChat();
+                _logger.Log(LogLevel.Information, "first search = 0");
+                chatId = _context.CreatePersonalChat(selfAccId, otherAccId);
             } else {
+                _logger.Log(LogLevel.Information, "first search != 0");
                 var chats = _context.Chat.Join(chatSearchResult,
                     ch => ch.Id,
-                    chAcc => chAcc.ChatId,
+                    chAcc => chAcc,
                     (ch, chAcc) => new {
                         Id = ch.Id,
                         ChatTypeId = ch.ChatTypeId
-                    }).Where(ch => ch.ChatTypeId == (int)ChatTypes.personal)
+                    }).Where(ch => ch.ChatTypeId == ChatTypes.personal)
                     .ToList();
                 if (chats.Count == 0) {
-                    chatId = _context.createChat();
+                    _logger.Log(LogLevel.Information, "second search = 0");
+                    chatId = _context.CreatePersonalChat(selfAccId, otherAccId);
                 } else {
+                    _logger.Log(LogLevel.Information, "second search != 0");
                     chatId = chats.First().Id;
                 }
             }
@@ -96,7 +98,7 @@ namespace SocialMedia1.hubs {
         }
 
         private List<Account> GetSelfFriends(string searchLine) {
-            int selfAccId = GetSelfAccId();
+            int selfAccId = _context.GetSelfAccId();
             if (searchLine != "")
                 return _context.Account
                 .FromSql($"select Account.Id, Account.Name from Account inner join Friends on Account.Id = Friends.FriendId where Friends.AccountId = {selfAccId} and Account.Name like {"%" + searchLine + "%"}")
@@ -104,12 +106,6 @@ namespace SocialMedia1.hubs {
             return _context.Account
                 .FromSql($"select Account.Id, Account.Name from Account inner join Friends on Account.Id = Friends.FriendId where Friends.AccountId = {selfAccId}")
                 .ToList();
-        }
-
-        [Authorize]
-        private int GetSelfAccId() {
-            string email = Context.User.Identity.Name;
-            return _context.LoginModel.FirstOrDefault(x => x.Email == email).AccountId;
         }
 
     }

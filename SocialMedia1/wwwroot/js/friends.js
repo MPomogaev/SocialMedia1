@@ -18,6 +18,7 @@ function setAccountsList(accounts, setContent) {
 }
 
 function setBlockForAllOption(content, account) {
+    setCommonContent(content, account.account)
     let button = content.querySelector("input")
     button.value = "add"
     if (!account.isFriend) {
@@ -28,28 +29,25 @@ function setBlockForAllOption(content, account) {
     } else {
         button.disabled = true
     }
-    setCommonContent(content, account.account)
     friendsList.appendChild(content)
 }
 
 function setBlockForMineOption(content, account) {
+    setCommonContent(content, account)
     let button = content.querySelector("input")
     button.value = "delete"
     button.addEventListener("click", () => {
         connection.invoke("DeleteFriend", account.id)
         button.parentNode.remove()
     })
-    setCommonContent(content, account)
     friendsList.appendChild(content)
 }
 
 function setCommonContent(content, account) {
     content.querySelector("label").textContent = account.name
     let button = content.querySelectorAll("input")[1]
-    button.value = "123"
     button.addEventListener("click", () => {
         connection.invoke("GoToChat", account.id)
-        button.parentNode.remove()
     })
 }
 
@@ -86,7 +84,8 @@ connection.on("GetMineAccounts", (accounts) => {
 })
 
 connection.on("GoToChat", (chatId) => {
-
+    let chatUrl = "/Home/Chats"
+    window.location.href = chatUrl
 })
 
 connection.start().then(() => {

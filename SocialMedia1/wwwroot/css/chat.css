@@ -1,27 +1,32 @@
-﻿.friendsList {
-
-}
-
-.newChat {
-    align-content: center;
-    position: relative;
-    top: 5px;
-}
-
-.pageContent {
+﻿.pageContent {
     display: block;
+    height: 100%;
 }
 
-.friendOption {
-    width: 200px;
-    display: inline-block;
-    justify-content: center;
-    background-color: chartreuse;
-    border: 3px solid #ccc;
-    background-color: white;
+.chatsList {
+    display: block;
+    font-size: 30px;
+    max-height: inherit;
+    vertical-align: central;
 }
 
-.chats{
-    position:relative;
-    top: 0;
+.chatEntry {
+    font-size: 40px;
+}
+
+.chat {
+    width:50%;
+    height: 100%;
+    margin: auto;
+}
+
+
+.messagesList {
+    height: 90%;
+    border: 1px solid #ccc;
+    overflow: auto;
+}
+
+.messagesList::-webkit-scrollbar {
+    display: none;
 }

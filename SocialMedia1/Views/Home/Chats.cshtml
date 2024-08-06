@@ -4,12 +4,30 @@
 
 <div class="pageContent">
     <div>
-        <label>Search</label>
+        <label >Search</label>
         <input type="text" id="searchBar" />
     </div>
-    <div class="chats">
-        
+    <div id="chat" class="chat">
+        <div id="messagesList" class="messagesList"></div>
+        <input type="text" id="messageInput" />
+        <input type="button" id="sendButton" value="send" />
     </div>
-    <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/chat.js"></script>
+    <ul class="chatsList" id="chatsList">
+        
+    </ul>
 </div>
+
+<template id="chatEntry" class="chatEntry">
+    <div>
+        <label></label>
+    </div>
+</template>
+
+<template id="messageTemplate">
+    <div>
+        <label></label>
+    </div>
+</template>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chats.js"></script>
