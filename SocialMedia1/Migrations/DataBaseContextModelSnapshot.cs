@@ -47,11 +47,15 @@ namespace SocialMedia1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ChatTypeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChatTypeId");
 
                     b.ToTable("Chat");
                 });
@@ -69,6 +73,32 @@ namespace SocialMedia1.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("ChatAccount");
+                });
+
+            modelBuilder.Entity("SocialMedia1.Models.ChatType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Type = "perconal"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Type = "group"
+                        });
                 });
 
             modelBuilder.Entity("SocialMedia1.Models.Friends", b =>
@@ -145,6 +175,17 @@ namespace SocialMedia1.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("SocialMedia1.Models.Chat", b =>
+                {
+                    b.HasOne("SocialMedia1.Models.ChatType", "ChatType")
+                        .WithMany()
+                        .HasForeignKey("ChatTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChatType");
                 });
 
             modelBuilder.Entity("SocialMedia1.Models.ChatAccount", b =>

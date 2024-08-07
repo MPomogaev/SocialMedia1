@@ -2,6 +2,39 @@
     Layout = "_MenuLayout";
 }
 
-<div>
-    Chats
+<div class="pageContent">
+    <div id="chat" class="chat">
+        <div>
+            <label>Search</label>
+            <input type="text" id="searchBar" />
+        </div>
+        <div id="messagesList" class="messagesList"></div>
+        <input type="text" id="messageInput" />
+        <input type="button" id="sendButton" value="send" />
+    </div>
+    <ul class="chatsList" id="chatsList">
+        
+    </ul>
 </div>
+
+<template id="chatEntry" class="chatEntry">
+    <div>
+        <label></label>
+    </div>
+</template>
+
+<template id="messageTemplate">
+    <div>
+        <label style="border-bottom: 1px solid #AAA;"></label>
+        <messageDate style="color: #AAA"></messageDate>
+    </div>
+</template>
+
+<template id="dateEntry">
+    <div class="dateEntry">
+        <label></label>
+    </div>
+</template>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chats.js"></script>

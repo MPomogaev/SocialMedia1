@@ -19,6 +19,8 @@ builder.Services.AddDbContext<DataBaseContext>(options =>
 
 builder.Services.AddSignalR();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -44,6 +46,7 @@ app.MapControllerRoute(
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<FriendsHub>("/friends");
+    endpoints.MapHub<ChatHub>("/chat");
 });
 
 app.Run();

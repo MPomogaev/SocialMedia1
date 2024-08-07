@@ -1,30 +1,27 @@
 ﻿using SocialMedia1.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
-namespace SocialMedia1.Data
-{
-    public class DataBaseContext: DbContext
-    {
+namespace SocialMedia1.Data {
+    public class DataBaseContext: DbContext {
+        IHttpContextAccessor _context;
+
         public DbSet<Account> Account { get; set; }
         public DbSet<Message> Message { get; set; }
         public DbSet<Chat> Chat { get; set; }
         public DbSet<ChatAccount> ChatAccount { get; set; }
         public DbSet<LoginModel> LoginModel { get; set; }
         public DbSet<Friends> Friends { get; set; }
+        public DbSet<ChatType> ChatType { get; set; }
 
-        public DataBaseContext(DbContextOptions<DataBaseContext> options)
-        : base(options){
-            //Database.EnsureDeleted();
-            Database.EnsureCreated();
+        public DataBaseContext(DbContextOptions<DataBaseContext> options, IHttpContextAccessor context)
+        : base(options) {
+            _context = context;
         }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=SocialMedia1;Trusted_Connection=True;");
-        //}
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Message>()
                 .Property(e => e.CreatedDate)
                 .HasDefaultValueSql("getdate()");
@@ -38,7 +35,68 @@ namespace SocialMedia1.Data
                 .HasOne(e => e.Friend)
                 .WithOne()
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ChatType>()
+                .HasKey(ct => ct.Id);
+            modelBuilder.Entity<ChatType>()
+                .Property(ct => ct.Id).HasConversion<int>();
+            modelBuilder.Entity<Chat>()
+                .Property(ch => ch.ChatTypeId).HasConversion<int>();
+
+            modelBuilder.Entity<ChatType>()
+                .HasData(new ChatType(ChatTypes.personal, "personal"));
+            modelBuilder.Entity<ChatType>()
+                .HasData(new ChatType(ChatTypes.group, "group"));
         }
-        
+
+        public IQueryable<int> GetAccountChatsIds(int accId) {
+            return this.ChatAccount
+                .Where(ch => ch.AccountId == accId)
+                .Select(ch => ch.ChatId);
+        }
+
+        public IQueryable<Chat> GetAccountChats(int accId) {
+            return this.Chat.Join(this.ChatAccount,
+                ch => ch.Id,
+                chatAcc => chatAcc.ChatId,
+                (ch, chatAcc) => new {
+                    Id = ch.Id,
+                    Name = ch.Name,
+                    ChatTypeId = ch.ChatTypeId,
+                    AccountId = chatAcc.AccountId
+                })
+                .Where(ch => ch.AccountId == accId)
+                .Select(ch => new Models.Chat(ch.Id, ch.Name, ch.ChatTypeId));
+        }
+
+        public int CreatePersonalChat(int firstAcc, int otherAcc) {
+            int chatId = CreateChat(ChatTypes.personal);
+            AddAccountToChat(chatId, firstAcc);
+            AddAccountToChat(chatId, otherAcc);
+            return chatId;
+        }
+
+        public List<int> GetChatsMembers(int chatId) {
+            return this.ChatAccount
+                .Where(chatAcc => chatAcc.ChatId == chatId)
+                .Select(chatAcc => chatAcc.AccountId).ToList();
+        }
+
+        public void AddAccountToChat(int chatId, int accId) {
+            this.ChatAccount.Add(new ChatAccount(chatId, accId));
+            this.SaveChanges();
+        }
+
+        [Authorize]
+        public int GetSelfAccId() {
+            string email = _context.HttpContext.User.Identity.Name;
+            return this.LoginModel.FirstOrDefault(x => x.Email == email).AccountId;
+        }
+
+        private int CreateChat(ChatTypes type) {
+            Chat chat = new Chat(type);
+            this.Chat.Add(chat);
+            this.SaveChanges();
+            return chat.Id;
+        }
     }
 }
