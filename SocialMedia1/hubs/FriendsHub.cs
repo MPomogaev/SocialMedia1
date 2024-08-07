@@ -69,8 +69,8 @@ namespace SocialMedia1.hubs {
         public async Task GoToChat(int otherAccId) {
             _logger.Log(LogLevel.Information, "going to chat");
             int selfAccId = _context.GetSelfAccId();
-            var chatSearchResult = _context.GetChats(selfAccId)
-                .Intersect(_context.GetChats(otherAccId));
+            var chatSearchResult = _context.GetAccountChatsIds(selfAccId)
+                .Intersect(_context.GetAccountChatsIds(otherAccId));
             int chatId;
             if (chatSearchResult.Count() == 0) {
                 _logger.Log(LogLevel.Information, "first search = 0");

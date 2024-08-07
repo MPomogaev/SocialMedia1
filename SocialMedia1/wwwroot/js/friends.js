@@ -84,7 +84,7 @@ connection.on("GetMineAccounts", (accounts) => {
 })
 
 connection.on("GoToChat", (chatId) => {
-    let chatUrl = "/Home/Chats"
+    let chatUrl = "/Home/Chats?id=" + chatId
     window.location.href = chatUrl
 })
 

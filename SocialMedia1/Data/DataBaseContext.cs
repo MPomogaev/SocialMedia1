@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
 namespace SocialMedia1.Data {
     public class DataBaseContext: DbContext {
@@ -47,10 +48,24 @@ namespace SocialMedia1.Data {
                 .HasData(new ChatType(ChatTypes.group, "group"));
         }
 
-        public IQueryable<int> GetChats(int accId) {
+        public IQueryable<int> GetAccountChatsIds(int accId) {
             return this.ChatAccount
                 .Where(ch => ch.AccountId == accId)
                 .Select(ch => ch.ChatId);
+        }
+
+        public IQueryable<Chat> GetAccountChats(int accId) {
+            return this.Chat.Join(this.ChatAccount,
+                ch => ch.Id,
+                chatAcc => chatAcc.ChatId,
+                (ch, chatAcc) => new {
+                    Id = ch.Id,
+                    Name = ch.Name,
+                    ChatTypeId = ch.ChatTypeId,
+                    AccountId = chatAcc.AccountId
+                })
+                .Where(ch => ch.AccountId == accId)
+                .Select(ch => new Models.Chat(ch.Id, ch.Name, ch.ChatTypeId));
         }
 
         public int CreatePersonalChat(int firstAcc, int otherAcc) {
@@ -58,6 +73,12 @@ namespace SocialMedia1.Data {
             AddAccountToChat(chatId, firstAcc);
             AddAccountToChat(chatId, otherAcc);
             return chatId;
+        }
+
+        public List<int> GetChatsMembers(int chatId) {
+            return this.ChatAccount
+                .Where(chatAcc => chatAcc.ChatId == chatId)
+                .Select(chatAcc => chatAcc.AccountId).ToList();
         }
 
         public void AddAccountToChat(int chatId, int accId) {

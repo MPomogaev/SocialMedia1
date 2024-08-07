@@ -3,11 +3,11 @@
 }
 
 <div class="pageContent">
-    <div>
-        <label >Search</label>
-        <input type="text" id="searchBar" />
-    </div>
     <div id="chat" class="chat">
+        <div>
+            <label>Search</label>
+            <input type="text" id="searchBar" />
+        </div>
         <div id="messagesList" class="messagesList"></div>
         <input type="text" id="messageInput" />
         <input type="button" id="sendButton" value="send" />
@@ -25,6 +25,13 @@
 
 <template id="messageTemplate">
     <div>
+        <label style="border-bottom: 1px solid #AAA;"></label>
+        <messageDate style="color: #AAA"></messageDate>
+    </div>
+</template>
+
+<template id="dateEntry">
+    <div class="dateEntry">
         <label></label>
     </div>
 </template>

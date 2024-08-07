@@ -1,5 +1,5 @@
 ﻿.pageContent {
-    display: block;
+    display: none;
     height: 100%;
 }
 
@@ -29,4 +29,32 @@
 
 .messagesList::-webkit-scrollbar {
     display: none;
+}
+
+.leftSideMsg {
+    word-break:break-all;
+    text-align: left;
+    margin-left: 20px;
+    margin-right: 40px;
+    margin-top: 20px;
+}
+
+.rightSideMsg {
+    word-break: break-all;
+    text-align: right;
+    margin-left: 40px;
+    margin-right: 20px;
+    margin-top: 20px;
+}
+
+.dateEntry {
+    text-align: center;
+    font-size: 21px;
+    margin: 15px;
+}
+
+messageDate {
+    font-size: 10px;
+    position: relative;
+    top: 5px;
 }

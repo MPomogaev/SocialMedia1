@@ -15,5 +15,11 @@ namespace SocialMedia1.Models
         public Chat(ChatTypes type) {
             ChatTypeId = type;
         }
+
+        public Chat(int id, string name, ChatTypes type) {
+            Id = id;
+            Name = name;
+            ChatTypeId = type;
+        }
     }
 }
