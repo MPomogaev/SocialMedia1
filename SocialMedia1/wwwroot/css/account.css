@@ -1,0 +1,32 @@
+﻿.accountDataBlock {
+    font-size: 20px;
+    display: flex;
+    padding: 40px;
+    border-bottom: 1px solid #ccc;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.infoEntry {
+    display: block;
+}
+
+.accountInfo {
+    display: inline-block;
+    text-align: left;
+    width: 80%;
+    margin-left: 10px;
+}
+
+.photo {
+    border: 2px solid;
+}
+
+.changeInfoButton {
+    font-size: 20px;
+}
+
+.changeInfoButton:hover {
+    border-bottom: 1px solid #ccc;
+}
+

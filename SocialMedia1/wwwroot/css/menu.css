@@ -1,7 +1,7 @@
 ﻿/* content start*/
 .content {
     display: inline-block;
-    width: 60%;
+    width: 59%;
     vertical-align: top;
     height: 600px;
     text-align: center;
@@ -9,12 +9,20 @@
 /* content end*/
 
 /* sidebar start*/
-.sidebar {
+.menuSidebar {
     display: inline-block;
     width: 20%;
     border-right: 1px solid #ccc;
     height: 600px;
     text-align: center;
-    vertical-align: central;
+    vertical-align: top;
 }
 /* sidebar end*/
+
+.rightSidebar {
+    display: inline-block;
+    width: 20%;
+    border-left: 1px solid #ccc;
+    text-align: center;
+    vertical-align: top;
+}

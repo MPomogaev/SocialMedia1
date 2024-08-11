@@ -1,24 +1,26 @@
 ﻿@{
     Layout = "_MenuLayout";
 }
-
-<div class="pageContent">
-    <div id="chat" class="chat">
-        <div>
-            <label>Search</label>
-            <input type="text" id="searchBar" />
+<link rel="stylesheet" href="~/css/chat.css" />
+<div class="content">
+    <div class="pageContent">
+        <div id="chat" class="chat">
+            <div>
+                <label>Search</label>
+                <input type="text" id="searchBar" />
+            </div>
+            <div id="messagesList" class="messagesList"></div>
+            <input type="text" id="messageInput" />
+            <input type="button" id="sendButton" value="send" />
         </div>
-        <div id="messagesList" class="messagesList"></div>
-        <input type="text" id="messageInput" />
-        <input type="button" id="sendButton" value="send" />
+        <ul class="chatsList" id="chatsList">
+        </ul>
     </div>
-    <ul class="chatsList" id="chatsList">
-        
-    </ul>
 </div>
 
-<template id="chatEntry" class="chatEntry">
-    <div>
+
+<template id="chatEntry">
+    <div class="chatEntry">
         <label></label>
     </div>
 </template>

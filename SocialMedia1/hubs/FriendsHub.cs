@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia1.Data;
 using SocialMedia1.Models;
-using System.Runtime.CompilerServices;
 
 
 namespace SocialMedia1.hubs {
@@ -19,26 +17,19 @@ namespace SocialMedia1.hubs {
         public async Task GetAllAccounts(string searchLine = "") {
             _logger.Log(LogLevel.Information, "searchLine: " + searchLine);
             int selfAccId = _context.GetSelfAccId();
-            List<Account> accounts;
-            if (searchLine == "") {
-                accounts = _context.Account.Where(x => x.Id != selfAccId).ToList();
-            } else {
-                accounts = _context.Account
-                    .Where(x => x.Id != selfAccId && EF.Functions.Like(x.Name, $"%{searchLine}%"))
-                    .ToList();
+            var accounts = _context.Account.Where(x => x.Id != selfAccId);
+            if (searchLine != "") {
+                accounts = accounts
+                    .Where(x => EF.Functions.Like(x.Name, $"%{searchLine}%"));
             }
             var friends = GetSelfFriends(searchLine);
             List<MarkedAccount> markedAccounts = new List<MarkedAccount>();
             foreach (var account in accounts) {
-                bool isNotFriend(Account acc) {
-                    return acc.Id != account.Id;
+                bool isNotFriend(Account friendAcc) {
+                    return friendAcc.Id != account.Id;
                 };
                 bool notFriend = friends.TrueForAll(isNotFriend);
-                if (notFriend) {
-                    markedAccounts.Add(new MarkedAccount(account, false));
-                } else {
-                    markedAccounts.Add(new MarkedAccount(account, true));
-                }
+                markedAccounts.Add(new MarkedAccount(account, !notFriend));
                 _logger.Log(LogLevel.Information, $"{account.Name} is not friend {notFriend}");
             }
             Clients.Caller.SendAsync("GetAllAccounts", markedAccounts);
@@ -47,6 +38,9 @@ namespace SocialMedia1.hubs {
         public async Task GetMineAccounts(string searchLine = "") {
             _logger.Log(LogLevel.Information, "searchLine: " + searchLine);
             var friends = GetSelfFriends(searchLine);
+            foreach (var account in friends) {
+                _logger.Log(LogLevel.Information, "friend " + account.Name);
+            }
             Clients.Caller.SendAsync("GetMineAccounts", friends);
         }
 
@@ -73,10 +67,8 @@ namespace SocialMedia1.hubs {
                 .Intersect(_context.GetAccountChatsIds(otherAccId));
             int chatId;
             if (chatSearchResult.Count() == 0) {
-                _logger.Log(LogLevel.Information, "first search = 0");
                 chatId = _context.CreatePersonalChat(selfAccId, otherAccId);
             } else {
-                _logger.Log(LogLevel.Information, "first search != 0");
                 var chats = _context.Chat.Join(chatSearchResult,
                     ch => ch.Id,
                     chAcc => chAcc,
@@ -86,10 +78,8 @@ namespace SocialMedia1.hubs {
                     }).Where(ch => ch.ChatTypeId == ChatTypes.personal)
                     .ToList();
                 if (chats.Count == 0) {
-                    _logger.Log(LogLevel.Information, "second search = 0");
                     chatId = _context.CreatePersonalChat(selfAccId, otherAccId);
                 } else {
-                    _logger.Log(LogLevel.Information, "second search != 0");
                     chatId = chats.First().Id;
                 }
             }
@@ -99,13 +89,15 @@ namespace SocialMedia1.hubs {
 
         private List<Account> GetSelfFriends(string searchLine) {
             int selfAccId = _context.GetSelfAccId();
+            var query = _context.Account
+                    .Join(_context.Friends,
+                        acc => acc.Id,
+                        friend => friend.FriendId,
+                        (acc, friend) => new { Account = acc, Friends = friend})
+                    .Where(join => join.Friends.AccountId == selfAccId);
             if (searchLine != "")
-                return _context.Account
-                .FromSql($"select Account.Id, Account.Name from Account inner join Friends on Account.Id = Friends.FriendId where Friends.AccountId = {selfAccId} and Account.Name like {"%" + searchLine + "%"}")
-                .ToList();
-            return _context.Account
-                .FromSql($"select Account.Id, Account.Name from Account inner join Friends on Account.Id = Friends.FriendId where Friends.AccountId = {selfAccId}")
-                .ToList();
+                query = query.Where(join => EF.Functions.Like(join.Account.Name, $"%{searchLine}%"));
+            return query.Select(join => join.Account).ToList();
         }
 
     }

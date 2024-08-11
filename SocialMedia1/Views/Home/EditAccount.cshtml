@@ -1,0 +1,28 @@
+﻿@{
+    Layout = "_MenuLayout";
+}
+@model Account
+<link rel="stylesheet" href="~/css/editAccount.css" />
+<div class="content">
+    <form method="post" asp-controller="Home" asp-action="EditAccount" class="editForm" enctype="multipart/form-data">
+        <div class="photo">
+            <img id="accountPhoto" style='width:220px; height:220px;' src="data:image/jpeg;base64,@(Convert.ToBase64String((byte[])ViewData["Photo"]))" />
+        </div>
+        <div class="infoEntry">
+            <input type="button" id="deleteButton" value="delete" />
+            <input type="file" id="photoInput" name="profilePhoto" />
+        </div>
+        <input type="checkbox" id="deleteCheckbox" name="deletePhoto" value="true" style="display: none;"/>
+        <label>Name</label>
+        <input type="text" asp-for="Name" value=@ViewData["Name"] class="infoEntry" />
+        <span asp-validation-for="Name"></span>
+        <label>LastName</label>
+        <input type="text" asp-for="LastName" value=@ViewData["LastName"] class="infoEntry" />
+        <span asp-validation-for="LastName"></span>
+        <label>Location</label>
+        <input type="text" asp-for="Location" value=@ViewData["Location"] class="infoEntry" />
+        <span asp-validation-for="Location"></span>
+        <input type="submit" value="Edit" class="infoEntry" />
+    </form>
+    <script src="~/js/editAccount.js"></script>
+</div>

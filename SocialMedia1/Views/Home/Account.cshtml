@@ -1,11 +1,20 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
     Layout = "_MenuLayout";
 }
-<div class="text-center">
-    <div style="font-size: 50px;">
-        Account<br />
+<link rel="stylesheet" href="~/css/account.css" />
+<div class="content">
+    <div id="accountDataBlock" class="accountDataBlock">
+        <div id="accountPhoto" class="photo">
+            <img style='width:220px; height:220px;' src="data:image/jpeg;base64,@(Convert.ToBase64String((byte[])ViewData["Photo"]))" />
+        </div>
+        <div id="accountInfo" class="accountInfo">
+            <label class="infoEntry">Name: @ViewData["Name"]</label>
+            <label class="infoEntry">LastName: @ViewData["LastName"]</label>
+            <label class="infoEntry">Location: @ViewData["Location"]</label>
+        </div>
     </div>
-    <label>Email: @ViewData["Email"]</label><br />
-    <label>Name: @ViewData["Name"]</label>
+</div>
+<div class="rightSidebar">
+    <label id="editAccountButton" class="changeInfoButton">Edit account</label>
+    <script src="~/js/account.js"></script>
 </div>

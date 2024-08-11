@@ -25,9 +25,8 @@
 }
 
 .friendLabel {
-    display: block;
-    position: absolute;
-    left: 50px;
+    text-align: left;
+    flex: 1;
 }
 
 .chatButton {
@@ -35,7 +34,13 @@
     right: -350px;
 }
 
-.friendButton {
-    position: relative;
-    right: -350px;
+.friendBlock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+}
+
+.friendButtons {
+    text-align: right;
 }
