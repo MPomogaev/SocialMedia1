@@ -15,6 +15,7 @@ namespace SocialMedia1.Data {
         public DbSet<LoginModel> LoginModel { get; set; }
         public DbSet<Friends> Friends { get; set; }
         public DbSet<ChatType> ChatType { get; set; }
+        public DbSet<Post> Post { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options, IHttpContextAccessor context)
         : base(options) {
@@ -35,12 +36,18 @@ namespace SocialMedia1.Data {
                 .HasOne(e => e.Friend)
                 .WithOne()
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Friends>()
+                .HasIndex(e => e.FriendId)
+                .IsUnique(false);
             modelBuilder.Entity<ChatType>()
                 .HasKey(ct => ct.Id);
             modelBuilder.Entity<ChatType>()
                 .Property(ct => ct.Id).HasConversion<int>();
             modelBuilder.Entity<Chat>()
                 .Property(ch => ch.ChatTypeId).HasConversion<int>();
+            modelBuilder.Entity<Post>()
+                .Property(e => e.CreatedDate)
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<ChatType>()
                 .HasData(new ChatType(ChatTypes.personal, "personal"));
@@ -90,6 +97,18 @@ namespace SocialMedia1.Data {
         public int GetSelfAccId() {
             string email = _context.HttpContext.User.Identity.Name;
             return this.LoginModel.FirstOrDefault(x => x.Email == email).AccountId;
+        }
+
+        public IQueryable<Account> GetFriends(int accId, string searchLine = "") {
+            var query = this.Account
+                .Join(this.Friends,
+                acc => acc.Id,
+                friend => friend.FriendId,
+                (acc, friend) => new { Account = acc, Friends = friend })
+                .Where(join => join.Friends.AccountId == accId);
+            if (searchLine != "")
+                query = query.Where(join => EF.Functions.Like(join.Account.Name, $"%{searchLine}%"));
+            return query.Select(join => join.Account);
         }
 
         private int CreateChat(ChatTypes type) {

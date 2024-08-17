@@ -30,3 +30,126 @@
     border-bottom: 1px solid #ccc;
 }
 
+.friendsBlock {
+    border-bottom: 1px solid #ccc;
+    height: 25%;
+}
+
+.friendsList {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+
+.friendsList::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.friendsListItem {
+    flex: 0 0 auto;
+    height: 100%;
+    aspect-ratio: 2/3;
+    padding: 5px;
+    padding-top: 10px;
+    margin-right: 6px;
+    margin-left: 6px;
+}
+
+.friendsListItemImage{
+    border: 1px solid ;
+    width: 100%;
+    aspect-ratio: 1/1;
+}
+
+.friendsListItemName {
+    font-size: 13px;
+    word-break: break-word;
+    overflow: hidden;
+    padding-top: 5px;
+}
+
+.createPostButton {
+    display: flex; 
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    height: 10%;
+}
+
+.createPostBlock {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    width: 100%;
+}
+
+.createPostTextarea {
+    height: 60%;
+    width: 90%;
+    margin-bottom: 10px;
+    margin-left: 20px;
+}
+
+.createPostTopic {
+    margin-bottom: 10px;
+    margin-left: 20px;
+}
+
+.createPostLabel {
+    margin-left: 20px;
+    font-size: 20px;
+}
+
+.postButton {
+    margin-top: 10px;
+    margin-left: 20px;
+    font-size: 20px;
+}
+
+.postsBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: fit-content;
+    padding-top: 30px;
+}
+
+.post {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 85%;
+    min-height: 20%;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+.postTitle {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.postText {
+    font-size: 15px;
+    margin-top: 5px;
+    word-break: break-word;
+}
+
+.postTime {
+    align-self: flex-end;
+    font-size: 12px;
+}
+
+.postDate {
+    width: 100%;
+    text-align: center;
+}

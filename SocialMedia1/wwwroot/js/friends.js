@@ -6,7 +6,6 @@ function highlight(option) {
     highlighted = option
 }
 
-
 function setAccountsList(accounts, setContent) {
     friendsList.innerHTML = ""
     let accountEntry = document.getElementById("accountTemplate")

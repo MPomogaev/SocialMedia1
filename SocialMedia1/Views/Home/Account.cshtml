@@ -1,20 +1,59 @@
 ﻿@{
     Layout = "_MenuLayout";
 }
+@model Account
+
 <link rel="stylesheet" href="~/css/account.css" />
 <div class="content">
     <div id="accountDataBlock" class="accountDataBlock">
         <div id="accountPhoto" class="photo">
-            <img style='width:220px; height:220px;' src="data:image/jpeg;base64,@(Convert.ToBase64String((byte[])ViewData["Photo"]))" />
+            <img style='width:220px; height:220px;' src="data:image/jpeg;base64,@(Convert.ToBase64String((byte[])Model.ProfilePhoto))" />
         </div>
         <div id="accountInfo" class="accountInfo">
-            <label class="infoEntry">Name: @ViewData["Name"]</label>
-            <label class="infoEntry">LastName: @ViewData["LastName"]</label>
-            <label class="infoEntry">Location: @ViewData["Location"]</label>
+            <label class="infoEntry">Name: @Model.Name</label>
+            <label class="infoEntry">LastName: @Model.LastName</label>
+            <label class="infoEntry">Location: @Model.Location</label>
         </div>
+    </div>
+    <div id="friendsBlock" class="friendsBlock">
+        <div id="friendsList" class="friendsList">
+        </div>
+    </div>
+    <div id="postsBlock" class="postsBlock"></div>
+    <div id="createPostBlock" class="createPostBlock">
+        <label class="createPostLabel">Topic</label>
+        <input type="text" id="createPostTopic" class="createPostTopic" />
+        <label class="createPostLabel">Text</label>
+        <textarea id="createPostTextarea" class="createPostTextarea"></textarea>
+        <input type="button" value="Post" class="postButton" id="postButton" />
     </div>
 </div>
 <div class="rightSidebar">
-    <label id="editAccountButton" class="changeInfoButton">Edit account</label>
-    <script src="~/js/account.js"></script>
+    <label id="editAccountButton" class="changeInfoButton">Edit account</label> <br />
+    <label id="createPostButton" class="changeInfoButton">Create post</label>
 </div>
+
+<template id="friendsListItemTemplate">
+    <div id="friendsListItem" class="friendsListItem">
+        <img alt="Sample Image" class="friendsListItemImage">
+        <label class="friendsListItemName"></label>
+    </div>
+</template>
+
+<template id="postTemplate">
+    <div class="post">
+        <label class="postTitle"></label>
+        <label class="postText"></label>
+        <label class="postTime"></label>
+    </div>
+</template>
+
+<template id="postDateTemplate">
+    <div class ="postDate">
+        <label></label>
+    </div>
+</template>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/account.js"></script>

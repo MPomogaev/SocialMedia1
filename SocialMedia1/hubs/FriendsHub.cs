@@ -89,15 +89,7 @@ namespace SocialMedia1.hubs {
 
         private List<Account> GetSelfFriends(string searchLine) {
             int selfAccId = _context.GetSelfAccId();
-            var query = _context.Account
-                    .Join(_context.Friends,
-                        acc => acc.Id,
-                        friend => friend.FriendId,
-                        (acc, friend) => new { Account = acc, Friends = friend})
-                    .Where(join => join.Friends.AccountId == selfAccId);
-            if (searchLine != "")
-                query = query.Where(join => EF.Functions.Like(join.Account.Name, $"%{searchLine}%"));
-            return query.Select(join => join.Account).ToList();
+            return _context.GetFriends(selfAccId, searchLine).ToList();
         }
 
     }

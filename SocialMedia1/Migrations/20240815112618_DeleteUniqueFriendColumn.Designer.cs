@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia1.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia1.Data;
 namespace SocialMedia1.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240815112618_DeleteUniqueFriendColumn")]
+    partial class DeleteUniqueFriendColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,38 +189,6 @@ namespace SocialMedia1.Migrations
                     b.ToTable("Message");
                 });
 
-            modelBuilder.Entity("SocialMedia1.Models.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("Post");
-                });
-
             modelBuilder.Entity("SocialMedia1.Models.Chat", b =>
                 {
                     b.HasOne("SocialMedia1.Models.ChatType", "ChatType")
@@ -295,17 +266,6 @@ namespace SocialMedia1.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Chat");
-                });
-
-            modelBuilder.Entity("SocialMedia1.Models.Post", b =>
-                {
-                    b.HasOne("SocialMedia1.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("SocialMedia1.Models.Account", b =>

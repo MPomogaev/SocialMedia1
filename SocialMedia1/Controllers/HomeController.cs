@@ -7,6 +7,7 @@ using SocialMedia1.Models;
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using SocialMedia1.Validators;
 
 
 namespace SocialMedia1.Controllers {
@@ -32,7 +33,6 @@ namespace SocialMedia1.Controllers {
         public async Task<IActionResult> SignIn(string Email, string Password) {
             LoginModel login = _context.LoginModel
                 .FirstOrDefault(acc => acc.Email == Email && acc.Password == Password);
-
             if (login != null) {
                 _logger.Log(LogLevel.Information, "found account for email: " + Email);
                 await Authenticate(Email);
@@ -65,11 +65,10 @@ namespace SocialMedia1.Controllers {
         public IActionResult Account(int? id) {
             if (id.HasValue) {
                 return GetAccount(id.Value);
-            } else {
-                LoginModel login = _context.LoginModel
-                    .FirstOrDefault(acc => acc.Email == User.Identity.Name);
-                return GetAccount(login.AccountId);
-            }
+            } 
+            LoginModel login = _context.LoginModel
+                .FirstOrDefault(acc => acc.Email == User.Identity.Name);
+            return GetAccount(login.AccountId);
         }
 
         [Authorize]
@@ -77,43 +76,38 @@ namespace SocialMedia1.Controllers {
         public IActionResult EditAccount() {
             int selfAccId = _context.GetSelfAccId();
             var account = _context.Account.FirstOrDefault(acc => acc.Id == selfAccId);
-            ProfilePhotoSetter.SetPhotoOrDefault(ref account);
-            ViewData["Name"] = account.Name;
-            ViewData["LastName"] = account.LastName;
-            ViewData["Location"] = account.Location;
-            ViewData["Photo"] = account.ProfilePhoto;
-            return View();
+            account.SetPhotoOrDefault();
+            return View(new EditAccountModel(account));
         }
 
         [Authorize]
         [HttpPost]
-        public IActionResult EditAccount(Account newAccountData, IFormFile profilePhoto, bool deletePhoto) {
-            _logger.Log(LogLevel.Information, "to delete is " + deletePhoto);
+        public IActionResult EditAccount(EditAccountModel data) {
+            if (!ModelState.IsValid) {
+                data.AccountData.SetPhotoOrDefault();
+                return View(data);
+            }
+            _logger.Log(LogLevel.Information, "to delete is " + data.DeletePhoto);
             int selfAccId = _context.GetSelfAccId();
             var account = _context.Account.Find(selfAccId);
-            ProfilePhotoSetter.SetPhotoOrDefault(ref account);
-            account.Name = newAccountData.Name;
-            account.LastName= newAccountData.LastName;
-            account.Location = newAccountData.Location;
-            if (deletePhoto) {
+            account.SetPhotoOrDefault();
+            account.Name = data.AccountData.Name;
+            account.LastName= data.AccountData.LastName;
+            account.Location = data.AccountData.Location;
+            if (data.DeletePhoto.HasValue && data.DeletePhoto.Value) {
                 account.ProfilePhoto = null;
             }
-            if (profilePhoto != null) {
+            if (data.ProfilePhoto != null) {
                 byte[] imageData = null;
-                using (var binaryReader = new BinaryReader(profilePhoto.OpenReadStream())) {
-                    imageData = binaryReader.ReadBytes((int)profilePhoto.Length);
+                using (var binaryReader = new BinaryReader(data.ProfilePhoto.OpenReadStream())) {
+                    imageData = binaryReader.ReadBytes((int)data.ProfilePhoto.Length);
                 }
                 account.ProfilePhoto = imageData;
             }
             try {
                 _context.SaveChanges();
             } catch {
-                ProfilePhotoSetter.SetPhotoOrDefault(ref newAccountData);
-                ViewData["Name"] = newAccountData.Name;
-                ViewData["LastName"] = newAccountData.LastName;
-                ViewData["Location"] = newAccountData.Location;
-                ViewData["Photo"] = newAccountData.ProfilePhoto;
-                return View(newAccountData);
+                return View(data);
             }
             return RedirectToAction("Account");
         }
@@ -122,16 +116,12 @@ namespace SocialMedia1.Controllers {
             Account account = _context.Account
                     .FirstOrDefault(acc => acc.Id == id);
             if (account != null) {
-                ProfilePhotoSetter.SetPhotoOrDefault(ref account);
+                account.SetPhotoOrDefault();
                 _logger.Log(LogLevel.Information, "enter account for " + account.Name);
-                ViewData["Name"] = account.Name;
-                ViewData["LastName"] = account.LastName;
-                ViewData["Location"] = account.Location;
-                ViewData["Photo"] = account.ProfilePhoto;
             } else {
                 _logger.Log(LogLevel.Error, "couldn't find account with id: " + id);
             }
-            return View();
+            return View(account);
         }
 
         [Authorize]
@@ -143,15 +133,28 @@ namespace SocialMedia1.Controllers {
         public IActionResult Chats() { return View(); }
 
         private async Task Authenticate(string email) {
-            // создаем один claim
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, email)
             };
-            // создаем объект ClaimsIdentity
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            // установка аутентификационных куки
+            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie",
+                ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity.DefaultRoleClaimType);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
+    }
+
+    public class EditAccountModel {
+        public Account AccountData { get; set; }
+        [MaxFileSize(GlobalVariebles.maxFileSize)]
+        public IFormFile? ProfilePhoto { get; set; }
+        public bool? DeletePhoto { get; set; }
+
+        public EditAccountModel() { }
+
+        public EditAccountModel(Account accountData) {
+            AccountData = accountData;
+        }
+
     }
 }
