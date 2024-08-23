@@ -1,7 +1,8 @@
 ﻿@{
     Layout = "_MenuLayout";
 }
-<div>
+<link rel="stylesheet" href="~/css/friends.css" />
+<div class="content">
     <div class="options">
         <label class="option" id="mineOption">Mine</label>
         <label class="option" id="allOption">All</label>
@@ -17,9 +18,11 @@
 </div>
 
 <template id="accountTemplate">
-    <div style="display:block; position:relative">
+    <div class="friendBlock">
         <label class="friendLabel"></label>
-        <input type="button" value="" class="friendButton" />
-        <input type="button" value="chat" class="friendButton" />
+        <div class="friendButtons">
+            <input type="button" value="" />
+            <input type="button" value="chat" />
+        </div>
     </div>
 </template>

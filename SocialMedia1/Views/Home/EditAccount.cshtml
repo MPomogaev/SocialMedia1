@@ -1,0 +1,29 @@
+﻿@{
+    Layout = "_MenuLayout";
+}
+@model SocialMedia1.Controllers.EditAccountModel
+<link rel="stylesheet" href="~/css/editAccount.css" />
+<div class="content">
+    <form method="post" asp-controller="Home" asp-action="EditAccount" class="editForm" enctype="multipart/form-data">
+        <div class="photo">
+            <img id="accountPhoto" style='width:220px; height:220px;' src="data:image/jpeg;base64,@(Convert.ToBase64String((byte[])Model.AccountData.ProfilePhoto))" />
+        </div>
+        <div class="infoEntry">
+            <input type="button" id="deleteButton" value="delete" />
+            <input type="file" id="photoInput" name="profilePhoto" />
+            <span asp-validation-for="ProfilePhoto"></span>
+        </div>
+        <input type="checkbox" id="deleteCheckbox" name="deletePhoto" value="true" style="display: none;"/>
+        <label>Name</label>
+        <input type="text" asp-for="AccountData.Name" value=@Model.AccountData.Name class="infoEntry" />
+        <span asp-validation-for="AccountData.Name"></span>
+        <label>LastName</label>
+        <input type="text" asp-for="AccountData.LastName" value=@Model.AccountData.LastName class="infoEntry" />
+        <span asp-validation-for="AccountData.LastName"></span>
+        <label>Location</label>
+        <input type="text" asp-for="AccountData.Location" value=@Model.AccountData.Location class="infoEntry" />
+        <span asp-validation-for="AccountData.Location"></span>
+        <input type="submit" value="Edit" class="infoEntry" />
+    </form>
+    <script src="~/js/editAccount.js"></script>
+</div>

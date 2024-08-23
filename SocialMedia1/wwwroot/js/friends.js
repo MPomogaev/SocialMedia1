@@ -6,7 +6,6 @@ function highlight(option) {
     highlighted = option
 }
 
-
 function setAccountsList(accounts, setContent) {
     friendsList.innerHTML = ""
     let accountEntry = document.getElementById("accountTemplate")
@@ -44,7 +43,12 @@ function setBlockForMineOption(content, account) {
 }
 
 function setCommonContent(content, account) {
-    content.querySelector("label").textContent = account.name
+    let nameLabel = content.querySelector("label")
+    nameLabel.textContent = account.name + " " + account.lastName
+    nameLabel.addEventListener("click", () => {
+        let accUrl = "/Home/Account?id=" + account.id
+        window.location.href = accUrl
+    })
     let button = content.querySelectorAll("input")[1]
     button.addEventListener("click", () => {
         connection.invoke("GoToChat", account.id)

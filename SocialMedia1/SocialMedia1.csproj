@@ -7,11 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\account.js" />
     <Content Remove="wwwroot\js\chats.js" />
+    <Content Remove="wwwroot\js\editAccount.js" />
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\js\account.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\editAccount.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\files\defaultProfilePhoto.bmp" />
+    <None Include="wwwroot\js\account.js" />
     <None Include="wwwroot\js\chats.js" />
+    <None Include="wwwroot\js\editAccount.js" />
   </ItemGroup>
 
   <ItemGroup>

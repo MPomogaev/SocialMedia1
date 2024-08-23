@@ -1,0 +1,22 @@
+﻿.postsBlock{
+    width: 100%;
+    height: fit-content;
+}
+
+.creatorsAccount {
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+}
+
+.creatorsAccountImage {
+    border: 1px solid;
+    height: 40px;
+    aspect-ratio: 1/1;
+}
+
+.creatorsName {
+    margin-left: 10px;
+    margin-right: 10px;
+}

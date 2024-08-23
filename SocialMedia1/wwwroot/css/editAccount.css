@@ -1,0 +1,15 @@
+﻿
+.editForm{
+    display:flex;
+    align-self: center;
+    flex-direction: column;
+}
+
+.infoEntry {
+    align-self: center;
+}
+
+.photo {
+    border: 2px solid;
+    align-self: center;
+}

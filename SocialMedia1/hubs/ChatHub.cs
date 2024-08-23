@@ -26,13 +26,10 @@ namespace SocialMedia1.hubs {
 
         public async Task GetChatMessages(string id, string searchStr) {
             int _id = int.Parse(id);
-            _logger.Log(LogLevel.Information, "getting chat messages " + _id);
-            _logger.Log(LogLevel.Information, "search str: " + searchStr);
-            IQueryable<Message> query;
-            if (searchStr == "") {
-                query = _context.Message.Where(msg => msg.ChatId == _id);
-            } else {
-                query = _context.Message.Where(msg => msg.ChatId == _id && EF.Functions.Like(msg.Text, $"%{searchStr}%"));
+            _logger.Log(LogLevel.Information, "getting chat msgs search str: " + searchStr);
+            IQueryable<Message> query = _context.Message.Where(msg => msg.ChatId == _id);
+            if (searchStr != "") {
+                query = query.Where(msg => EF.Functions.Like(msg.Text, $"%{searchStr}%"));
             }
             Clients.Caller.SendAsync("GetChatMessages", query.ToList());
         }
@@ -66,7 +63,8 @@ namespace SocialMedia1.hubs {
                     break;
                 }
             }
-            chat.Name = _context.Account.FirstOrDefault(acc => acc.Id == otherAccId).Name;
+            var account = _context.Account.FirstOrDefault(acc => acc.Id == otherAccId);
+            chat.Name = account.Name + " " + account.LastName;
         }
     }
 }
