@@ -48,6 +48,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapHub<FriendsHub>("/friends");
     endpoints.MapHub<ChatHub>("/chat");
     endpoints.MapHub<AccountHub>("/account");
+    endpoints.MapHub<PostsHub>("/posts");
 });
 
 app.Run();

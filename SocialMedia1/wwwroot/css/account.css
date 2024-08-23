@@ -118,38 +118,3 @@
     min-height: fit-content;
     padding-top: 30px;
 }
-
-.post {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 85%;
-    min-height: 20%;
-    border-bottom: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    margin: auto;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    padding: 10px;
-}
-
-.postTitle {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.postText {
-    font-size: 15px;
-    margin-top: 5px;
-    word-break: break-word;
-}
-
-.postTime {
-    align-self: flex-end;
-    font-size: 12px;
-}
-
-.postDate {
-    width: 100%;
-    text-align: center;
-}

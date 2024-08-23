@@ -29,8 +29,6 @@ function setFriend(friend) {
 }
 
 function compareDates(firstDate, secondDate) {
-    console.log(firstDate)
-    console.log(secondDate)
     return firstDate.getDate() == secondDate.getDate()
         && firstDate.getFullYear() == secondDate.getFullYear()
 }

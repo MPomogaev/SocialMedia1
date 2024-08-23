@@ -14,15 +14,11 @@ namespace SocialMedia1.hubs {
 
         public async Task GetFriends(string accIdStr) {
             int accId = accIdStr == null ? _context.GetSelfAccId(): int.Parse(accIdStr);
-            var friendsList = new List<FriendEntryData> ();
+            var friendsList = new List<ParsedAccountData> ();
             var accounts = _context.GetFriends(accId).ToList();
             accounts.ForEach(account => {
                 account.SetPhotoOrDefault();
-                var friend = new FriendEntryData {
-                    Id = account.Id,
-                    Name = account.Name,
-                    ProfilePhoto = Convert.ToBase64String(account.ProfilePhoto)
-                };
+                var friend = new ParsedAccountData(account);
                 friendsList.Add(friend);
             });
             Clients.Caller.SendAsync("GetFriends", friendsList);
@@ -49,12 +45,5 @@ namespace SocialMedia1.hubs {
             _context.SaveChanges();
             Clients.Caller.SendAsync("Post");
         }
-
-        struct FriendEntryData { 
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string ProfilePhoto { get; set; }
-        }
-
     }
 }

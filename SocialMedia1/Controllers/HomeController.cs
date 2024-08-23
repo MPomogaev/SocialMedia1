@@ -61,6 +61,11 @@ namespace SocialMedia1.Controllers {
             return View();
         }
 
+        public IActionResult LogOut() {
+            HttpContext.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
         [Authorize]
         public IActionResult Account(int? id) {
             if (id.HasValue) {
@@ -123,6 +128,10 @@ namespace SocialMedia1.Controllers {
             }
             return View(account);
         }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult Posts() { return View(); }
 
         [Authorize]
         [HttpGet]

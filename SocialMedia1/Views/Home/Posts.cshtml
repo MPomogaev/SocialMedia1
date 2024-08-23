@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "_MenuLayout";
+}
+
+<link rel="stylesheet" href="~/css/posts.css" />
+<link rel="stylesheet" href="~/css/post.css" />
+<div class="content">
+    <div id="postsBlock" class="postsBlock">
+
+    </div>
+</div>
+
+<template id="postTemplate">
+    <div class="post">
+        <div class="creatorsAccount">
+            <img alt="Sample Image" class="creatorsAccountImage" />
+            <label class="creatorsName">Имя Фамилия</label>
+        </div>
+        <label class="postTitle"></label>
+        <label class="postText"></label>
+        <label class="postTime"></label>
+    </div>
+</template>
+
+<template id="postDateTemplate">
+    <div class="postDate">
+        <label></label>
+    </div>
+</template>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/posts.js"></script>
