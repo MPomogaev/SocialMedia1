@@ -19,7 +19,9 @@ namespace SocialMedia1.hubs {
             int selfAccId = _context.GetSelfAccId();
             List<Chat> chats = _context.GetAccountChats(selfAccId).ToList();
             foreach (var chat in chats) {
-                SetChatName(chat, selfAccId);
+                if (chat.Name == null) {
+                    SetChatName(chat, selfAccId);
+                }
             }
             Clients.Caller.SendAsync("GetChats", chats);
         }
@@ -45,7 +47,6 @@ namespace SocialMedia1.hubs {
 
         [Authorize]
         public async Task ConnectToChat(string chatId) {
-            _logger.Log(LogLevel.Information, "connecting to chat " + chatId);
             Groups.AddToGroupAsync(Context.ConnectionId, chatId);
         }
 
@@ -53,6 +54,22 @@ namespace SocialMedia1.hubs {
         public async Task GetSelfAccountId() {
             _logger.Log(LogLevel.Information, "getting self account id");
             Clients.Caller.SendAsync("GetSelfAccountId", _context.GetSelfAccId());
+        }
+
+        public async Task GetFriends() {
+            int selfAccId = _context.GetSelfAccId();
+            Clients.Caller.SendAsync("GetFriends", _context.GetParsedFriendsData(selfAccId));
+        }
+
+        public async Task CreateChat(string name, List<int> members) {
+            _logger.LogInformation("chat name " + name);
+            int selfAccountId = _context.GetSelfAccId();
+            members.Add(selfAccountId);
+            foreach (int member in members) {
+                _logger.LogInformation("member " + member);
+            }
+            int chatId = _context.CreateGroupChat(name, members);
+            Clients.Caller.SendAsync("ChatCreated", chatId);
         }
 
         private void SetChatName(Chat chat, int selfAccId) {

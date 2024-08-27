@@ -54,8 +54,58 @@
     margin: 15px;
 }
 
-messageDate {
+.messageDate {
     font-size: 10px;
     position: relative;
     top: 5px;
+}
+
+.createChatBlock{
+    display: none;
+    flex-direction: column;
+    width: 50%;
+    height: 100%;
+    margin:auto;
+}
+
+.friendsList{
+
+}
+
+.friendsListBlock {
+    margin-top: 15px;
+    height: 90%;
+    border: 1px solid #ccc;
+    overflow: auto;
+}
+
+.createChatButtonBlock {
+    margin-top: 15px;
+}
+
+.friendsListBlock::-webkit-scrollbar {
+    display: none;
+}
+
+.friendEntryTemplate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid;
+}
+
+.friendChosenCheckbox {
+    transform: scale(1.5)
+}
+
+.friendNameLabel {
+
+}
+
+.friendProfileImage {
+    border: 1px solid;
+    height: 40px;
+    aspect-ratio: 1/1;
 }

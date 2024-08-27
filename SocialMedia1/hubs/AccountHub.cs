@@ -14,14 +14,7 @@ namespace SocialMedia1.hubs {
 
         public async Task GetFriends(string accIdStr) {
             int accId = accIdStr == null ? _context.GetSelfAccId(): int.Parse(accIdStr);
-            var friendsList = new List<ParsedAccountData> ();
-            var accounts = _context.GetFriends(accId).ToList();
-            accounts.ForEach(account => {
-                account.SetPhotoOrDefault();
-                var friend = new ParsedAccountData(account);
-                friendsList.Add(friend);
-            });
-            Clients.Caller.SendAsync("GetFriends", friendsList);
+            Clients.Caller.SendAsync("GetFriends", _context.GetParsedFriendsData(accId));
         }
 
         public async Task GetPosts(string accIdStr) {

@@ -15,7 +15,23 @@
         </div>
         <ul class="chatsList" id="chatsList">
         </ul>
+        <div id="createChatBlock" class="createChatBlock">
+            <div class="chooseNameBlock">
+                <label>Name: </label>
+                <input type="text" id="nameTextInput" />
+            </div>
+            <div id="friendsListBlock" class="friendsListBlock">
+                <div id="friendsList" class="friendsList">
+                </div>
+            </div>
+            <div class="createChatButtonBlock">
+                <input type="button" onclick="createChat();" value="Create chat" />
+            </div>
+        </div>
     </div>
+</div>
+<div class="rightSidebar">
+    <label id="createChatLabel" class="sidebarButton" onclick="goToCreateChat()">Create chat</label>
 </div>
 
 
@@ -35,6 +51,15 @@
 <template id="dateEntry">
     <div class="dateEntry">
         <label></label>
+    </div>
+</template>
+
+<template id="friendEntryTemplate">
+    <div class="friendEntryTemplate">
+        <img class="friendProfileImage" />
+        <label class="friendNameLabel">name1</label>
+        <input type="checkbox" class="friendChosenCheckbox" />
+        <input class="friendId" style="display: none;" />
     </div>
 </template>
 
