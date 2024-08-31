@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SocialMedia1.Data;
 using SocialMedia1.Models;
 
@@ -24,6 +25,11 @@ namespace SocialMedia1.hubs {
                 }
             }
             Clients.Caller.SendAsync("GetChats", chats);
+        }
+
+        public async Task GetChatType(string chatId) {
+            int id = int.Parse(chatId);
+            Clients.Caller.SendAsync("ReceiveChatType", _context.GetChat(id).ChatTypeId);
         }
 
         public async Task GetChatMessages(string id, string searchStr) {
@@ -65,11 +71,45 @@ namespace SocialMedia1.hubs {
             _logger.LogInformation("chat name " + name);
             int selfAccountId = _context.GetSelfAccId();
             members.Add(selfAccountId);
-            foreach (int member in members) {
-                _logger.LogInformation("member " + member);
-            }
             int chatId = _context.CreateGroupChat(name, members);
             Clients.Caller.SendAsync("ChatCreated", chatId);
+        }
+
+        public async Task EditChat(string chatIdStr, string name, List<int> curentMembers) {
+            _logger.LogInformation("chat name " + name);
+            int selfAccountId = _context.GetSelfAccId();
+            curentMembers.Add(selfAccountId);
+            int chatId = int.Parse(chatIdStr);
+            var oldMembers = _context.GetChatsMembers(chatId).ToHashSet();
+            List<int> toAdd = new();
+            curentMembers.ForEach(member => {
+                if (!oldMembers.Contains(member)) {
+                    toAdd.Add(member);
+                } else {
+                    oldMembers.Remove(member);
+                }
+            });
+            toAdd.ForEach(memberId => {
+                _context.ChatAccount.Add(new ChatAccount(chatId, memberId));
+            });
+            _context.SaveChanges();
+            oldMembers.ToList().ForEach(memberId => {
+                DeleteAccountFromChat(chatId, memberId);
+            });
+            Clients.Caller.SendAsync("ChatEdited", chatId);
+        }
+
+        public async Task LeaveChat(string chatId) {
+            int id = int.Parse(chatId);
+            int selfAccId = _context.GetSelfAccId();
+            DeleteAccountFromChat(id, selfAccId);
+            Clients.Caller.SendAsync("LeftChat");
+        }
+
+        public async Task GetChatInfo(int id) {
+            string chatName = _context.GetChat(id).Name;
+            List<int> membersIds = _context.GetChatsMembers(id).ToList();
+            Clients.Caller.SendAsync("SetChatInfo", chatName, membersIds);
         }
 
         private void SetChatName(Chat chat, int selfAccId) {
@@ -82,6 +122,20 @@ namespace SocialMedia1.hubs {
             }
             var account = _context.Account.FirstOrDefault(acc => acc.Id == otherAccId);
             chat.Name = account.Name + " " + account.LastName;
+        }
+
+        private void DeleteAccountFromChat(int chatId, int accId) {
+            var row = _context.ChatAccount.Find(chatId, accId);
+            _logger.LogInformation("deleting acc " + row.AccountId + " from chat " + row.ChatId);
+            _context.ChatAccount.Remove(row);
+            _context.SaveChanges();
+            var chatMembers = _context.GetChatsMembers(chatId);
+            if (chatMembers.IsNullOrEmpty()) {
+                var chat = _context.Chat.Find(chatId);
+                _context.Chat.Remove(chat);
+                _context.SaveChanges();
+                _logger.LogInformation("chat deleted");
+            }
         }
     }
 }

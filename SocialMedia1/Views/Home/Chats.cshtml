@@ -25,15 +25,18 @@
                 </div>
             </div>
             <div class="createChatButtonBlock">
-                <input type="button" onclick="createChat();" value="Create chat" />
+                <input id="chatSettingsButton" type="button" value="Save" />
             </div>
         </div>
     </div>
 </div>
-<div class="rightSidebar">
+<div id="rightSidebar" class="rightSidebar" style="display: none;">
+    <div id="chatOptions" class="sidebarbuttonsBlock">
+        <label id="leaveChatLabel" class="sidebarButton" onclick="leaveChat()">Leave chat</label>
+        <label id="editChatLabel" class="sidebarButton" onclick="goToEditChat()">Edit chat</label>
+    </div>
     <label id="createChatLabel" class="sidebarButton" onclick="goToCreateChat()">Create chat</label>
 </div>
-
 
 <template id="chatEntry">
     <div class="chatEntry">
@@ -64,4 +67,4 @@
 </template>
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/chats.js"></script>
+<script type="module" src="~/js/chats.js"></script>

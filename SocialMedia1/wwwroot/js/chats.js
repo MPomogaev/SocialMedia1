@@ -1,16 +1,17 @@
-﻿const connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+﻿import { getRightSidebarContentSwitcher, ContentSwitcher } from './contentSwitcher.js'
+import { DateEntryHandler, dateToString } from './dateHandler.js'
+
+const connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
 const urlParams = new URLSearchParams(window.location.search);
 const chatId = urlParams.get('id');
-let lastYear = (new Date()).getFullYear()
+
 let selfId
-let lastMsgDate
 
 let searchBar = document.getElementById("searchBar")
 let chatsList = document.getElementById("chatsList")
 let messagesList = document.getElementById("messagesList")
 let friendsList = document.getElementById("friendsList")
-let chat = document.getElementById("chat")
 let chatEntryTemplate = document.getElementById("chatEntry")
 let messageTemplate = document.getElementById("messageTemplate")
 let dateEntryTemplate = document.getElementById("dateEntry")
@@ -19,10 +20,21 @@ let messagesInput = document.getElementById("messageInput")
 let sendButton = document.getElementById("sendButton")
 let nameTextInput = document.getElementById("nameTextInput")
 
+const dateEntryHandler = new DateEntryHandler(dateEntryTemplate, messagesList)
 
-function setFriendToFriendsList(friend) {
+const rightSideBarSwitcher = getRightSidebarContentSwitcher()
+const pageContent = document.querySelector(".pageContent")
+const mainContentSwitcher = new ContentSwitcher(pageContent.children, pageContent, "block")
+
+const ChatTypes = {
+    private: 1,
+    public: 2
+}
+
+function addFriendToFriendsList(friend, isChosen) {
     let friendEntry = friendEntryTemplate.content.cloneNode(true)
     friendEntry.querySelector("label").textContent = friend.name
+    friendEntry.querySelector(".friendChosenCheckbox").checked = isChosen
     friendEntry.querySelector(".friendId").value = friend.id
     const imgElement = friendEntry.querySelector("img");
     imgElement.src = "data:image/png;base64," + friend.profilePhoto;
@@ -33,23 +45,29 @@ function setFriendToFriendsList(friend) {
     friendsList.appendChild(friendEntry)
 }
 
-function goToCreateChat() {
-    document.getElementById("createChatLabel").style.display = "none"
-    document.getElementById("chatsList").style.display = "none"
-    document.getElementById("createChatBlock").style.display = "flex"
+function setChatOptionsContent() {
+    rightSideBarSwitcher.setDefaults([])
+    mainContentSwitcher.setDefaults(["createChatBlock"])
+}
+
+function setChatSaveButtonOnclick(action) {
+    document.getElementById("chatSettingsButton")
+        .addEventListener("click", action)
+}
+
+function startFriendsReceiving(action) {
     connection.on("GetFriends", (friends) => {
         for (const friend of friends) {
-            setFriendToFriendsList(friend)
+            action(friend)
         }
     })
     connection.invoke("GetFriends")
 }
 
-function createChat() {
+function getChatSettings() {
     let name = nameTextInput.value
-    console.log(name)
     if (name == "") {
-        return
+        return null
     }
     let chatMembersIds = []
     friendsList.querySelectorAll(".friendEntryTemplate").forEach((child) => {
@@ -59,69 +77,100 @@ function createChat() {
             chatMembersIds.push(parseInt(friendId))
         }
     })
-    console.log(chatMembersIds)
+    console.log(name, chatMembersIds)
+    return { name: name, members: chatMembersIds }
+}
+
+function createChat() {
+    const settings = getChatSettings()
     connection.on("ChatCreated", (chatId) => {
         let url = "/Home/Chats?id=" + chatId
         window.location.href = url
     })
-    connection.invoke("CreateChat", name, chatMembersIds)
+    connection.invoke("CreateChat", settings.name, settings.members)
 }
 
-function showChatContent() {
-    document.querySelector(".pageContent").style.display = "block"
+function editChat() {
+    const settings = getChatSettings()
+    connection.on("ChatEdited", (chatId) => {
+        let url = "/Home/Chats?id=" + chatId
+        window.location.href = url
+    })
+    connection.invoke("EditChat", chatId, settings.name, settings.members)
 }
+
+function leaveChat() {
+    connection.on("LeftChat", () => {
+        window.location.href = "/Home/Chats"
+    })
+    connection.invoke("LeaveChat", chatId);
+}
+window.leaveChat = leaveChat
+
+function goToCreateChat() {
+    setChatOptionsContent()
+    setChatSaveButtonOnclick(createChat)
+    startFriendsReceiving((friend) => {
+        addFriendToFriendsList(friend, false)
+    })
+}
+window.goToCreateChat = goToCreateChat
+
+function goToEditChat() {
+    setChatOptionsContent()
+    setChatSaveButtonOnclick(editChat)
+    connection.on("SetChatInfo", (name, members) => {
+        console.log(name, members)
+        nameTextInput.value = name
+        startFriendsReceiving((friend) => {
+            if (members.includes(friend.id)) {
+                addFriendToFriendsList(friend, true)
+            } else {
+                addFriendToFriendsList(friend, false)
+            }
+        })
+    })
+    connection.invoke("GetChatInfo", parseInt(chatId))
+}
+window.goToEditChat = goToEditChat
 
 function setChat(chat) {
     let chatEntry = chatEntryTemplate.content.cloneNode(true)
-    chatEntry.querySelector("label").textContent = chat.name
+    let chatEntryLabel = chatEntry.querySelector("label")
+    if (chat.chatTypeId != ChatTypes.private) {
+        chatEntryLabel.style.fontWeight = 'bold'
+    }
+    chatEntryLabel.textContent = chat.name
     chatEntry.querySelector("div").addEventListener("click", () => {
         window.location.href = "/Home/Chats?id=" + chat.id
     })
     chatsList.appendChild(chatEntry)
 }
 
-function compareDates(firstDate, secondDate) {
-    return firstDate.getDate() == secondDate.getDate()
-        && firstDate.getFullYear() == secondDate.getFullYear()
-}
-
-function appendDateToMsgList(msgDate) {
-    if (lastMsgDate == null || !compareDates(lastMsgDate, msgDate)) {
-        lastMsgDate = msgDate
-        let dateEntry = dateEntryTemplate.content.cloneNode(true)
-        let dateStr = lastMsgDate.getDate() + " "
-            + lastMsgDate.toLocaleString('default', { month: 'long' })
-        let year = msgDate.getFullYear()
-        if (lastYear != year) {
-            lastYear = year
-            dateStr += " " + year
-        }
-        dateEntry.querySelector("label").textContent = dateStr
-        messagesList.appendChild(dateEntry)
-    } 
-}
-
 function setMessage(msg) {
     let message = messageTemplate.content.cloneNode(true)
     message.querySelector("label").textContent = msg.text
     let date = new Date(msg.createdDate)
-    message.querySelector("messageDate").textContent =
-        date.getHours() + ":"
-        + date.getMinutes() + ":"
-        + date.getSeconds()
+    message.querySelector("messageDate").textContent = dateToString(date)
     if (msg.accountId == selfId) {
         message.querySelector("div").classList.add("rightSideMsg")
     } else {
         message.querySelector("div").classList.add("leftSideMsg")
     }
-    appendDateToMsgList(date)
+    dateEntryHandler.setDate(date)
     messagesList.appendChild(message)
 }
 
 if (chatId) {
-    chatsList.style.display = "none"
-    showChatContent()
-    lastMsgDate = null;
+    mainContentSwitcher.setDefaults(["chat"])
+
+    connection.on("ReceiveChatType", (type) => {
+        if (type == ChatTypes.private) {
+            rightSideBarSwitcher.setDefaults([])
+        } else {
+            rightSideBarSwitcher.setDefaults(["chatOptions"])
+        }
+    })
 
     connection.on("GetChatMessages", (msgs) => {
         messagesList.innerHTML = ""
@@ -141,10 +190,12 @@ if (chatId) {
     })
 
     connection.start().then(() => {
+        connection.invoke("GetChatType", chatId)
         connection.invoke("GetSelfAccountId")
         connection.invoke("ConnectToChat", chatId).then(() => {
             connection.invoke("GetChatMessages", chatId, searchBar.value)
         })
+        
     })
 
     sendButton.addEventListener("click", () => {
@@ -158,10 +209,11 @@ if (chatId) {
     })
 
 } else {
-    chat.style.display = "none"
-    showChatContent()
+    mainContentSwitcher.setDefaults(["chatsList"])
+    rightSideBarSwitcher.setDefaults(["createChatLabel"])
 
     connection.on("GetChats", (chats) => {
+        console.log(chats)
         for (let i = 0; i < chats.length; i++) {
             setChat(chats[i])
         }

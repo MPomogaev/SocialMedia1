@@ -27,7 +27,7 @@ namespace SocialMedia1.Data {
                 .Property(e => e.CreatedDate)
                 .HasDefaultValueSql("getdate()");
             modelBuilder.Entity<ChatAccount>()
-                .HasKey(e => new { e.AccountId, e.ChatId });
+                .HasKey(e => new { e.ChatId, e.AccountId });
             modelBuilder.Entity<LoginModel>()
                 .HasIndex(e => e.Email);
             modelBuilder.Entity<Friends>()
@@ -92,16 +92,20 @@ namespace SocialMedia1.Data {
             return chatId;
         }
 
-        public List<int> GetChatsMembers(int chatId) {
+        public IQueryable<int> GetChatsMembers(int chatId) {
             return this.ChatAccount
                 .Where(chatAcc => chatAcc.ChatId == chatId)
-                .Select(chatAcc => chatAcc.AccountId).ToList();
+                .Select(chatAcc => chatAcc.AccountId);
         }
 
         [Authorize]
         public int GetSelfAccId() {
             string email = _context.HttpContext.User.Identity.Name;
             return this.LoginModel.FirstOrDefault(x => x.Email == email).AccountId;
+        }
+
+        public Chat GetChat(int id) {
+            return this.Chat.FirstOrDefault(ch => ch.Id == id);
         }
 
         public IQueryable<Account> GetFriends(int accId, string searchLine = "") {

@@ -30,6 +30,11 @@
     vertical-align: top;
 }
 
+.sidebarbuttonsBlock {
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebarButton {
     margin: auto;
     font-size: 25px;
@@ -41,3 +46,4 @@
 .sidebarButton:hover {
     border-bottom: 1px solid #ccc;
 }
+
