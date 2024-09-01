@@ -5,19 +5,41 @@
 <div class="content">
     <div class="pageContent">
         <div id="chat" class="chat">
-            <div>
+            <label class="chatName" id="chatName"></label>
+            <div style="margin-bottom: 10px;">
                 <label>Search</label>
                 <input type="text" id="searchBar" />
             </div>
             <div id="messagesList" class="messagesList"></div>
-            <input type="text" id="messageInput" />
-            <input type="button" id="sendButton" value="send" />
+            <div style="margin-top: 10px;">
+                <input type="text" id="messageInput" />
+                <input type="button" id="sendButton" value="send" />
+            </div>
         </div>
         <ul class="chatsList" id="chatsList">
         </ul>
+        <div id="createChatBlock" class="createChatBlock">
+            <div class="chooseNameBlock">
+                <label>Name: </label>
+                <input type="text" id="nameTextInput" />
+            </div>
+            <div id="friendsListBlock" class="friendsListBlock">
+                <div id="friendsList" class="friendsList">
+                </div>
+            </div>
+            <div class="createChatButtonBlock">
+                <input id="chatSettingsButton" type="button" value="Save" />
+            </div>
+        </div>
     </div>
 </div>
-
+<div id="rightSidebar" class="rightSidebar" style="display: none;">
+    <div id="chatOptions" class="sidebarbuttonsBlock">
+        <label id="leaveChatLabel" class="sidebarButton" onclick="leaveChat()">Leave chat</label>
+        <label id="editChatLabel" class="sidebarButton" onclick="goToEditChat()">Edit chat</label>
+    </div>
+    <label id="createChatLabel" class="sidebarButton" onclick="goToCreateChat()">Create chat</label>
+</div>
 
 <template id="chatEntry">
     <div class="chatEntry">
@@ -38,5 +60,20 @@
     </div>
 </template>
 
+<template id="nameEntry">
+    <div class="nameEntry">
+        <label></label>
+    </div>
+</template>
+
+<template id="friendEntryTemplate">
+    <div class="friendEntryTemplate">
+        <img class="friendProfileImage" />
+        <label class="friendNameLabel">name1</label>
+        <input type="checkbox" class="friendChosenCheckbox" />
+        <input class="friendId" style="display: none;" />
+    </div>
+</template>
+
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/chats.js"></script>
+<script type="module" src="~/js/chats.js"></script>

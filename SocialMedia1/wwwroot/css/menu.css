@@ -10,8 +10,10 @@
 
 /* sidebar start*/
 .menuSidebar {
-    display: inline-block;
+    display: flex;
     width: 20%;
+    flex-direction: column;
+    align-content:space-between;
     border-right: 1px solid #ccc;
     height: 600px;
     text-align: center;
@@ -20,9 +22,28 @@
 /* sidebar end*/
 
 .rightSidebar {
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     width: 20%;
     border-left: 1px solid #ccc;
     text-align: center;
     vertical-align: top;
 }
+
+.sidebarbuttonsBlock {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebarButton {
+    margin: auto;
+    font-size: 25px;
+    padding: .5rem 1rem;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.sidebarButton:hover {
+    border-bottom: 1px solid #ccc;
+}
+

@@ -37,7 +37,7 @@ function setBlockForMineOption(content, account) {
     button.value = "delete"
     button.addEventListener("click", () => {
         connection.invoke("DeleteFriend", account.id)
-        button.parentNode.remove()
+        button.parentNode.parentNode.remove()
     })
     friendsList.appendChild(content)
 }

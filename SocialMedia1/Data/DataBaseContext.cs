@@ -1,8 +1,8 @@
 ﻿using SocialMedia1.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using System.Linq.Expressions;
+using System.Text;
+using System.Diagnostics;
 
 namespace SocialMedia1.Data {
     public class DataBaseContext: DbContext {
@@ -27,7 +27,7 @@ namespace SocialMedia1.Data {
                 .Property(e => e.CreatedDate)
                 .HasDefaultValueSql("getdate()");
             modelBuilder.Entity<ChatAccount>()
-                .HasKey(e => new { e.AccountId, e.ChatId });
+                .HasKey(e => new { e.ChatId, e.AccountId });
             modelBuilder.Entity<LoginModel>()
                 .HasIndex(e => e.Email);
             modelBuilder.Entity<Friends>()
@@ -77,26 +77,35 @@ namespace SocialMedia1.Data {
 
         public int CreatePersonalChat(int firstAcc, int otherAcc) {
             int chatId = CreateChat(ChatTypes.personal);
-            AddAccountToChat(chatId, firstAcc);
-            AddAccountToChat(chatId, otherAcc);
+            this.ChatAccount.Add(new ChatAccount(chatId, firstAcc));
+            this.ChatAccount.Add(new ChatAccount(chatId, otherAcc));
+            this.SaveChanges();
             return chatId;
         }
 
-        public List<int> GetChatsMembers(int chatId) {
-            return this.ChatAccount
-                .Where(chatAcc => chatAcc.ChatId == chatId)
-                .Select(chatAcc => chatAcc.AccountId).ToList();
+        public int CreateGroupChat(string name, List<int> members) {
+            int chatId = CreateChat(ChatTypes.group, name);
+            foreach(int member in members) {
+                this.ChatAccount.Add(new ChatAccount(chatId, member));
+            }
+            this.SaveChanges();
+            return chatId;
         }
 
-        public void AddAccountToChat(int chatId, int accId) {
-            this.ChatAccount.Add(new ChatAccount(chatId, accId));
-            this.SaveChanges();
+        public IQueryable<int> GetChatsMembers(int chatId) {
+            return this.ChatAccount
+                .Where(chatAcc => chatAcc.ChatId == chatId)
+                .Select(chatAcc => chatAcc.AccountId);
         }
 
         [Authorize]
         public int GetSelfAccId() {
             string email = _context.HttpContext.User.Identity.Name;
             return this.LoginModel.FirstOrDefault(x => x.Email == email).AccountId;
+        }
+
+        public Chat GetChat(int id) {
+            return this.Chat.FirstOrDefault(ch => ch.Id == id);
         }
 
         public IQueryable<Account> GetFriends(int accId, string searchLine = "") {
@@ -111,8 +120,22 @@ namespace SocialMedia1.Data {
             return query.Select(join => join.Account);
         }
 
-        private int CreateChat(ChatTypes type) {
+        public List<ParsedAccountData> GetParsedFriendsData(int accId) {
+            var friendsList = new List<ParsedAccountData>();
+            var accounts = this.GetFriends(accId).ToList();
+            accounts.ForEach(account => {
+                account.SetPhotoOrDefault();
+                var friend = new ParsedAccountData(account);
+                friendsList.Add(friend);
+            });
+            return friendsList;
+        }
+
+        private int CreateChat(ChatTypes type, string name = "") {
             Chat chat = new Chat(type);
+            if (!String.IsNullOrWhiteSpace(name)) {
+                chat.Name = name;
+            }
             this.Chat.Add(chat);
             this.SaveChanges();
             return chat.Id;

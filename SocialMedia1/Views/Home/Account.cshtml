@@ -30,8 +30,8 @@
     </div>
 </div>
 <div class="rightSidebar">
-    <label id="editAccountButton" class="changeInfoButton">Edit account</label> <br />
-    <label id="createPostButton" class="changeInfoButton">Create post</label>
+    <label id="editAccountButton" class="sidebarButton" onclick="window.location.href = '/Home/EditAccount'">Edit account</label>
+    <label id="createPostButton" class="sidebarButton">Create post</label>
 </div>
 
 <template id="friendsListItemTemplate">
@@ -57,4 +57,4 @@
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/account.js"></script>
+<script type="module" src="~/js/account.js"></script>

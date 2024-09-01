@@ -22,14 +22,6 @@
     border: 2px solid;
 }
 
-.changeInfoButton {
-    font-size: 20px;
-}
-
-.changeInfoButton:hover {
-    border-bottom: 1px solid #ccc;
-}
-
 .friendsBlock {
     border-bottom: 1px solid #ccc;
     height: 25%;
