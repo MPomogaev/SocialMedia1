@@ -11,11 +11,13 @@
     <Content Remove="wwwroot\js\chats.js" />
     <Content Remove="wwwroot\js\contentSwitcher.js" />
     <Content Remove="wwwroot\js\editAccount.js" />
+    <Content Remove="wwwroot\js\nameHandler.js" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\js\account.js" />
     <_ContentIncludedByDefault Remove="wwwroot\js\editAccount.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\nameHandler.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +26,7 @@
     <None Include="wwwroot\js\chats.js" />
     <None Include="wwwroot\js\editAccount.js" />
     <None Include="wwwroot\js\contentSwitcher.js" />
+    <None Include="wwwroot\js\nameHandler.js" />
   </ItemGroup>
 
   <ItemGroup>

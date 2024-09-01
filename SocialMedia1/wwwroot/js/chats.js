@@ -1,5 +1,6 @@
 ﻿import { getRightSidebarContentSwitcher, ContentSwitcher } from './contentSwitcher.js'
 import { DateEntryHandler, dateToString } from './dateHandler.js'
+import { NameEntryHandler } from './nameHandler.js'
 
 const connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
@@ -15,12 +16,14 @@ let friendsList = document.getElementById("friendsList")
 let chatEntryTemplate = document.getElementById("chatEntry")
 let messageTemplate = document.getElementById("messageTemplate")
 let dateEntryTemplate = document.getElementById("dateEntry")
+let nameEntryTemplate = document.getElementById("nameEntry")
 let friendEntryTemplate = document.getElementById("friendEntryTemplate")
 let messagesInput = document.getElementById("messageInput")
 let sendButton = document.getElementById("sendButton")
 let nameTextInput = document.getElementById("nameTextInput")
 
 const dateEntryHandler = new DateEntryHandler(dateEntryTemplate, messagesList)
+let nameEntryHandler = new NameEntryHandler(nameEntryTemplate, messagesList)
 
 const rightSideBarSwitcher = getRightSidebarContentSwitcher()
 const pageContent = document.querySelector(".pageContent")
@@ -29,6 +32,10 @@ const mainContentSwitcher = new ContentSwitcher(pageContent.children, pageConten
 const ChatTypes = {
     private: 1,
     public: 2
+}
+
+function isWhitespace(str) {
+    return /^\s*$/.test(str);
 }
 
 function addFriendToFriendsList(friend, isChosen) {
@@ -66,7 +73,7 @@ function startFriendsReceiving(action) {
 
 function getChatSettings() {
     let name = nameTextInput.value
-    if (name == "") {
+    if (isWhitespace(name)) {
         return null
     }
     let chatMembersIds = []
@@ -158,13 +165,15 @@ function setMessage(msg) {
         message.querySelector("div").classList.add("leftSideMsg")
     }
     dateEntryHandler.setDate(date)
+    nameEntryHandler.setName(msg.accountId)
     messagesList.appendChild(message)
 }
 
 if (chatId) {
     mainContentSwitcher.setDefaults(["chat"])
 
-    connection.on("ReceiveChatType", (type) => {
+    connection.on("ReceiveChatTypeAndName", (type, name) => {
+        document.getElementById("chatName").textContent = name
         if (type == ChatTypes.private) {
             rightSideBarSwitcher.setDefaults([])
         } else {
@@ -187,19 +196,26 @@ if (chatId) {
 
     connection.on("GetSelfAccountId", (accId) => {
         selfId = accId
+        nameEntryHandler = new NameEntryHandler(nameEntryTemplate, messagesList, selfId)
+        connection.invoke("GetMembersAccounts", chatId)
+    })
+
+    connection.on("GetMembersAccounts", (membersAccounts) => {
+        nameEntryHandler.setAccountsDict(membersAccounts)
+        connection.invoke("GetChatMessages", chatId, searchBar.value)
     })
 
     connection.start().then(() => {
-        connection.invoke("GetChatType", chatId)
+        connection.invoke("GetChatTypeAndName", chatId)
         connection.invoke("GetSelfAccountId")
-        connection.invoke("ConnectToChat", chatId).then(() => {
-            connection.invoke("GetChatMessages", chatId, searchBar.value)
-        })
-        
+        connection.invoke("ConnectToChat", chatId)
     })
 
     sendButton.addEventListener("click", () => {
         let text = messagesInput.value
+        if (text == "") {
+            return
+        }
         connection.invoke("SendMessage", text, chatId)
         messagesInput.value = ""
     })

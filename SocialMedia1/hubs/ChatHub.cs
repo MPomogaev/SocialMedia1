@@ -27,9 +27,13 @@ namespace SocialMedia1.hubs {
             Clients.Caller.SendAsync("GetChats", chats);
         }
 
-        public async Task GetChatType(string chatId) {
+        public async Task GetChatTypeAndName(string chatId) {
             int id = int.Parse(chatId);
-            Clients.Caller.SendAsync("ReceiveChatType", _context.GetChat(id).ChatTypeId);
+            var chat = _context.GetChat(id);
+            if (chat.ChatTypeId == ChatTypes.personal) {
+                SetChatName(chat, _context.GetSelfAccId());
+            }
+            Clients.Caller.SendAsync("ReceiveChatTypeAndName", chat.ChatTypeId, chat.Name);
         }
 
         public async Task GetChatMessages(string id, string searchStr) {
@@ -43,6 +47,9 @@ namespace SocialMedia1.hubs {
         }
 
         public async Task SendMessage(string text, string chatId) {
+            if (String.IsNullOrWhiteSpace(text)) {
+                return;
+            }
             int selfAccId = _context.GetSelfAccId();
             _logger.Log(LogLevel.Information, "sending msg " + text + " from " + selfAccId + " to chat " + chatId);
             Message msg = new Message(selfAccId, text, int.Parse(chatId));
@@ -65,6 +72,22 @@ namespace SocialMedia1.hubs {
         public async Task GetFriends() {
             int selfAccId = _context.GetSelfAccId();
             Clients.Caller.SendAsync("GetFriends", _context.GetParsedFriendsData(selfAccId));
+        }
+
+        public async Task GetMembersAccounts(string chatIdStr) {
+            int chatId = int.Parse(chatIdStr);
+            var membersIds = _context.GetChatsMembers(chatId).ToHashSet();
+            var membersAccount = _context.Account.
+                Where(account => membersIds.Contains(account.Id)).
+                Select(account => new {
+                    id = account.Id, 
+                    name = account.Name,
+                    lastName = account.LastName
+                });
+            foreach(var member in membersAccount.ToArray()) {
+                _logger.LogInformation(chatIdStr + " member " + member.name + " " + member.lastName);
+            }
+            Clients.Caller.SendAsync("GetMembersAccounts", membersAccount.ToList());
         }
 
         public async Task CreateChat(string name, List<int> members) {
