@@ -16,6 +16,8 @@ namespace SocialMedia1.Data {
         public DbSet<Friends> Friends { get; set; }
         public DbSet<ChatType> ChatType { get; set; }
         public DbSet<Post> Post { get; set; }
+        public DbSet<FriendRequestStatus> FriendRequestStatus { get; set; }
+        public DbSet<FriendRequest> FriendRequest { get; set; }
 
         public DataBaseContext(DbContextOptions<DataBaseContext> options, IHttpContextAccessor context)
         : base(options) {
@@ -35,7 +37,7 @@ namespace SocialMedia1.Data {
             modelBuilder.Entity<Friends>()
                 .HasOne(e => e.Friend)
                 .WithOne()
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Friends>()
                 .HasIndex(e => e.FriendId)
                 .IsUnique(false);
@@ -48,11 +50,29 @@ namespace SocialMedia1.Data {
             modelBuilder.Entity<Post>()
                 .Property(e => e.CreatedDate)
                 .HasDefaultValueSql("getdate()");
+            modelBuilder.Entity<FriendRequestStatus>()
+                .HasKey(status => status.Id);
+            modelBuilder.Entity<FriendRequestStatus>()
+                .Property(status => status.Id).HasConversion<int>();
+            modelBuilder.Entity<FriendRequest>()
+                .Property(request => request.StatusId).HasConversion<int>();
+            modelBuilder.Entity<FriendRequest>()
+                .HasIndex(request => new {request.RequesterId, request.RequestedId})
+                .IsUnique();
+            modelBuilder.Entity<FriendRequest>()
+                .HasOne(request => request.Requested)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ChatType>()
-                .HasData(new ChatType(ChatTypes.personal, "personal"));
-            modelBuilder.Entity<ChatType>()
-                .HasData(new ChatType(ChatTypes.group, "group"));
+            foreach (var item in GlobalVariebles.ChatTypesList) {
+                modelBuilder.Entity<ChatType>()
+                    .HasData(new ChatType(item.id, item.type));
+            }
+
+            foreach(var item in GlobalVariebles.FriendRequestStatusesList) {
+                modelBuilder.Entity<FriendRequestStatus>()
+                    .HasData(new FriendRequestStatus(item.id, item.status));
+            }
         }
 
         public IQueryable<int> GetAccountChatsIds(int accId) {
