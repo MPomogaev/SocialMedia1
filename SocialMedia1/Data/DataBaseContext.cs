@@ -1,8 +1,6 @@
 ﻿using SocialMedia1.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using System.Text;
-using System.Diagnostics;
 
 namespace SocialMedia1.Data {
     public class DataBaseContext: DbContext {
@@ -57,12 +55,14 @@ namespace SocialMedia1.Data {
             modelBuilder.Entity<FriendRequest>()
                 .Property(request => request.StatusId).HasConversion<int>();
             modelBuilder.Entity<FriendRequest>()
-                .HasIndex(request => new {request.RequesterId, request.RequestedId})
-                .IsUnique();
+                .HasKey(request => new {request.RequesterId, request.RequestedId});
             modelBuilder.Entity<FriendRequest>()
                 .HasOne(request => request.Requested)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<FriendRequest>()
+                .HasIndex(request => request.RequestedId)
+                .IsUnique(false);
 
             foreach (var item in GlobalVariebles.ChatTypesList) {
                 modelBuilder.Entity<ChatType>()
@@ -129,15 +129,16 @@ namespace SocialMedia1.Data {
         }
 
         public IQueryable<Account> GetFriends(int accId, string searchLine = "") {
-            var query = this.Account
-                .Join(this.Friends,
-                acc => acc.Id,
-                friend => friend.FriendId,
-                (acc, friend) => new { Account = acc, Friends = friend })
-                .Where(join => join.Friends.AccountId == accId);
-            if (searchLine != "")
-                query = query.Where(join => EF.Functions.Like(join.Account.Name, $"%{searchLine}%"));
-            return query.Select(join => join.Account);
+            var friendsIds = this.Friends
+                .Where(friend => friend.FriendId == accId)
+                .Select(friend => friend.AccountId)
+                .Union(this.Friends
+                    .Where(friend => friend.AccountId == accId)
+                    .Select(friend => friend.FriendId));
+            var friends = this.Account
+                .Where(account => friendsIds.Contains(account.Id));
+            AddWhereLikeStatement(ref friends, searchLine);
+            return friends;
         }
 
         public List<ParsedAccountData> GetParsedFriendsData(int accId) {
@@ -149,6 +150,13 @@ namespace SocialMedia1.Data {
                 friendsList.Add(friend);
             });
             return friendsList;
+        }
+
+        public void AddWhereLikeStatement(ref IQueryable<Account> query, string searchLine) {
+            if (searchLine != "") {
+                query = query
+                    .Where(acc => EF.Functions.Like(acc.Name, $"%{searchLine}%"));
+            }
         }
 
         private int CreateChat(ChatTypes type, string name = "") {
