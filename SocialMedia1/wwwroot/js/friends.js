@@ -6,40 +6,70 @@ function highlight(option) {
     highlighted = option
 }
 
+function removeBlockWithButton(button) {
+    button.parentNode.parentNode.remove()
+}
+
 function setAccountsList(accounts, setContent) {
     friendsList.innerHTML = ""
     let accountEntry = document.getElementById("accountTemplate")
-    const searchString = searchBar.value
     for (let i = 0; i < accounts.length; i++) {
         const content = accountEntry.content.cloneNode(true)
-        setContent(content, accounts[i], searchString)
+        setCommonContent(content, accounts[i])
+        setContent(content, accounts[i])
+        friendsList.appendChild(content)
     }
 }
 
 function setBlockForAllOption(content, account) {
-    setCommonContent(content, account.account)
     let button = content.querySelector("input")
     button.value = "add"
-    if (!account.isFriend) {
+    if (account.canRequest) {
         button.addEventListener("click", () => {
-            connection.invoke("AddFriend", account.account.id)
-            button.disabled = true
+            connection.invoke("AddFriend", account.id)
+            button.style.display = "none"
         })
     } else {
-        button.disabled = true
+        button.style.display = "none"
     }
-    friendsList.appendChild(content)
 }
 
 function setBlockForMineOption(content, account) {
-    setCommonContent(content, account)
+    let chatButton = content.querySelectorAll("input")[1]
+    chatButton.style.display = "inline-block"
+    chatButton.addEventListener("click", () => {
+        connection.invoke("GoToChat", account.id)
+    })
     let button = content.querySelector("input")
     button.value = "delete"
     button.addEventListener("click", () => {
         connection.invoke("DeleteFriend", account.id)
-        button.parentNode.parentNode.remove()
+        removeBlockWithButton(button)
     })
-    friendsList.appendChild(content)
+}
+
+function setBlockForRequestsToMe(content, account) {
+    let buttons = content.querySelectorAll("input")
+    buttons[0].value = "aprove"
+    buttons[0].addEventListener("click", () => {
+        connection.invoke("AddFriend", account.id)
+        removeBlockWithButton(buttons[0])
+    })
+    buttons[1].style.display = "inline-block"
+    buttons[1].addEventListener("click", () => {
+        connection.invoke("RejectRequest", account.id)
+        removeBlockWithButton(buttons[1])
+    })
+    buttons[1].value = "reject"
+}
+
+function setBlockForRequestsFromMe(content, account) {
+    let button = content.querySelector("input")
+    button.value = "delete"
+    button.addEventListener("click", () => {
+        connection.invoke("RecallRequest", account.id)
+        removeBlockWithButton(button)
+    })
 }
 
 function setCommonContent(content, account) {
@@ -49,32 +79,36 @@ function setCommonContent(content, account) {
         let accUrl = "/Home/Account?id=" + account.id
         window.location.href = accUrl
     })
-    let button = content.querySelectorAll("input")[1]
-    button.addEventListener("click", () => {
-        connection.invoke("GoToChat", account.id)
-    })
 }
 
 let highlighted = null
 const mineOption = document.getElementById("mineOption")
 const allOption = document.getElementById("allOption")
+const inRequestsOption = document.getElementById("inRequestsOption")
+const outRequestsOption = document.getElementById("outRequestsOption")
 const friendsList = document.getElementById("friendsList")
 const searchBar = document.getElementById("searchBar")
 
-mineOption.addEventListener('click', () => {
-    highlight(mineOption)
-    connection.invoke("GetMineAccounts", searchBar.value)
-})
-allOption.addEventListener('click', () => {
-    highlight(allOption)
-    connection.invoke("GetAllAccounts", searchBar.value)
-})
+const optionsActionDict = new Map([
+    [mineOption, "GetMineAccounts"],
+    [allOption, "GetAllAccounts"],
+    [inRequestsOption, "GetRequestsToMe"],
+    [outRequestsOption, "GetRequestsFromMe"]
+])
+
+for (let optionAction of optionsActionDict) {
+    let option = optionAction[0]
+    let serverAction = optionAction[1]
+    option.addEventListener('click', () => {
+        highlight(option)
+        console.log("invoking " + serverAction)
+        connection.invoke(serverAction, searchBar.value)
+    })
+}
+
 searchBar.addEventListener('input', (event) => {
-    if (highlighted == mineOption) {
-        connection.invoke("GetMineAccounts", event.target.value)
-    } else {
-        connection.invoke("GetAllAccounts", event.target.value)
-    }
+    let serverAction = optionsActionDict.get(highlighted)
+    connection.invoke(serverAction, event.target.value)
 })
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/friends").build();
@@ -85,6 +119,14 @@ connection.on("GetAllAccounts", (accounts) => {
 
 connection.on("GetMineAccounts", (accounts) => {
     setAccountsList(accounts, setBlockForMineOption)
+})
+
+connection.on("GetRequestsToMe", (accounts) => {
+    setAccountsList(accounts, setBlockForRequestsToMe)
+})
+
+connection.on("GetRequestsFromMe", (accounts) => {
+    setAccountsList(accounts, setBlockForRequestsFromMe)
 })
 
 connection.on("GoToChat", (chatId) => {

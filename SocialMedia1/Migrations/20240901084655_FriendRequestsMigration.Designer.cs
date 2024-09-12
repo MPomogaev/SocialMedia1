@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia1.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia1.Data;
 namespace SocialMedia1.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240901084655_FriendRequestsMigration")]
+    partial class FriendRequestsMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,20 +116,30 @@ namespace SocialMedia1.Migrations
 
             modelBuilder.Entity("SocialMedia1.Models.FriendRequest", b =>
                 {
-                    b.Property<int>("RequesterId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("RequestedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RequesterId")
                         .HasColumnType("int");
 
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
-                    b.HasKey("RequesterId", "RequestedId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("RequestedId");
+                    b.HasIndex("RequestedId")
+                        .IsUnique();
 
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("RequesterId", "RequestedId")
+                        .IsUnique();
 
                     b.ToTable("FriendRequest");
                 });

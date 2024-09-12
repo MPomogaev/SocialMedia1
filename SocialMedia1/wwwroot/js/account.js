@@ -1,4 +1,5 @@
 ﻿import { DateEntryHandler, dateToString } from './dateHandler.js'
+import { getRightSidebarContentSwitcher } from './contentSwitcher.js'
 
 const connection = new signalR.HubConnectionBuilder().withUrl("/account").build();
 
@@ -16,6 +17,8 @@ const postsBlock = document.getElementById("postsBlock")
 const createPostBlock = document.getElementById("createPostBlock")
 
 const dateEntryHandler = new DateEntryHandler(postDateTemplate, postsBlock)
+
+const rightSidebarContentSwitcher = getRightSidebarContentSwitcher()
 
 function setFriend(friend) {
     let friendEntry = friendsListItemTemplate.content.cloneNode(true)
@@ -67,7 +70,7 @@ try {
 }
 
 if (accountId != null) {
-    createPostButtonBlock.style.display = "none"
+    rightSidebarContentSwitcher.setDefaults([])
 }
 
 document.getElementById("createPostButton").addEventListener("click", () => {
